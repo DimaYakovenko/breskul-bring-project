@@ -1,5 +1,8 @@
 package com.bring.project.service.processor.impl;
 
+import com.bring.project.exception.EmptyDirectoryException;
+import com.bring.project.exception.InvalidFileNameException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,7 +16,7 @@ public class PackageScanner {
         try {
             classes.addAll(getClassesByPackageName(mainPackageName));
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Can't get information about all classes", e);
+            throw new EmptyDirectoryException("Can't get information about all classes", e);
         }
     }
 
@@ -27,6 +30,15 @@ public class PackageScanner {
     }
 
 
+    /**
+     * Scans all classes accessible from the context class loader which
+     * belong to the given package and subpackages.
+     *
+     * @param packageName The base package
+     * @return The classes
+     * @throws ClassNotFoundException if the class cannot be located
+     * @throws IOException            if I/O errors occur
+     */
     private static List<Class> getClassesByPackageName(String packageName) throws IOException, ClassNotFoundException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
@@ -47,6 +59,15 @@ public class PackageScanner {
     }
 
 
+    /**
+     * Recursive method used to find all classes in a given directory and subdirs.
+     *
+     * @param directory   The base directory
+     * @param packageName The package name for classes found inside the base directory
+     * @return The classes
+     * @throws InvalidFileNameException if directory consist point "."
+     * @throws ClassNotFoundException if the class cannot be located
+     */
     private static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
         List<Class> classes = new ArrayList<>();
         if (!directory.exists()) {
@@ -58,7 +79,7 @@ public class PackageScanner {
                 String fileName = file.getName();
                 if (file.isDirectory()) {
                     if (fileName.contains(".")) {
-                        throw new RuntimeException("File name shouldn't consist point.");
+                        throw new InvalidFileNameException("File name shouldn't consist point \".\"");
                     }
                     classes.addAll(findClasses(file, packageName + "." + fileName));
                 } else if (file.getName().endsWith(".class")) {
