@@ -9,7 +9,7 @@ import java.net.URL;
 import java.util.*;
 
 public class PackageScanner {
-    private static final Map<String, PackageScanner> injectors = new HashMap<>();
+    private static final Map<String, PackageScanner> PACKAGE_SCANNER_CONTEXT = new HashMap<>();
     private List<Class> classes = new ArrayList<>();
 
     public PackageScanner(String mainPackageName) {
@@ -21,12 +21,12 @@ public class PackageScanner {
     }
 
     public static PackageScanner getInstance(String mainPackageName) {
-        if (injectors.containsKey(mainPackageName)) {
-            return injectors.get(mainPackageName);
+        if (PACKAGE_SCANNER_CONTEXT.containsKey(mainPackageName)) {
+            return PACKAGE_SCANNER_CONTEXT.get(mainPackageName);
         }
-        PackageScanner injector = new PackageScanner(mainPackageName);
-        injectors.put(mainPackageName, injector);
-        return injector;
+        PackageScanner packageScanner = new PackageScanner(mainPackageName);
+        PACKAGE_SCANNER_CONTEXT.put(mainPackageName, packageScanner);
+        return packageScanner;
     }
 
 
