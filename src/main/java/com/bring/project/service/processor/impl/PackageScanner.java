@@ -1,15 +1,19 @@
 package com.bring.project.service.processor.impl;
 
-import com.bring.project.exception.EmptyDirectoryException;
-import com.bring.project.exception.InvalidFileNameException;
+import com.bring.project.annotation.*;
+import com.bring.project.exception.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 
 public class PackageScanner {
     private static final Map<String, PackageScanner> PACKAGE_SCANNER_CONTEXT = new HashMap<>();
+    private Map<Class, Object> instanceOfClasses = new HashMap<>();
     private List<Class> classes = new ArrayList<>();
 
     public PackageScanner(String mainPackageName) {
@@ -20,13 +24,82 @@ public class PackageScanner {
         }
     }
 
-    public static PackageScanner getInstance(String mainPackageName) {
+    public static PackageScanner scanPackage(String mainPackageName) {
         if (PACKAGE_SCANNER_CONTEXT.containsKey(mainPackageName)) {
             return PACKAGE_SCANNER_CONTEXT.get(mainPackageName);
         }
         PackageScanner packageScanner = new PackageScanner(mainPackageName);
         PACKAGE_SCANNER_CONTEXT.put(mainPackageName, packageScanner);
         return packageScanner;
+    }
+
+    public Object getBean(Class certainInterface) {
+        Object newInstanceOfClass = null;
+        Class clazz = findClassExtendingInterface(certainInterface);
+        Field[] declaredFields = clazz.getDeclaredFields();
+        if (declaredFields.length == 0) {
+            return getNewInstance(clazz);
+        }
+        for (Field field : declaredFields) {
+            if (field.getDeclaredAnnotation(Autowired.class) != null) {
+                Object classToInject = getBean(field.getType());
+                newInstanceOfClass = getNewInstance(clazz);
+                setValueToField(field, newInstanceOfClass, classToInject);
+            } else {
+                throw new NotFoundAnnotationException("Class " + field.getName() + " in class "
+                        + clazz.getName() + " hasn't annotation Autowired");
+            }
+        }
+
+        return newInstanceOfClass;
+    }
+
+    private Class<?> findClassExtendingInterface(Class<?> certainInterface) {
+        Class<?> correctClass = null;
+        for (Class<?> clazz : classes) {
+            Class<?>[] interfaces = clazz.getInterfaces();
+            for (Class<?> singleInterface : interfaces) {
+                if (singleInterface.equals(certainInterface)
+                        && (clazz.isAnnotationPresent(Service.class)
+                        || clazz.isAnnotationPresent(Dao.class))) {
+                    if (correctClass == null) {
+                        correctClass = clazz;
+                    } else {
+                        throw new ClassHasMoreOneInterfacesException("Two or more classes that implement interface "
+                                + certainInterface.getName() + " has annotation Dao or Service)");
+                    }
+                }
+            }
+        }
+        if (correctClass != null) {
+            return correctClass;
+        }
+        throw new RuntimeException("Can't find class which implemented "
+                + certainInterface.getName() + " interface with valid annotation (Dao or Service)");
+    }
+
+    private Object getNewInstance(Class<?> certainClass) {
+        if (instanceOfClasses.containsKey(certainClass)) {
+            return instanceOfClasses.get(certainClass);
+        }
+        try {
+            Constructor<?> constructorDao = certainClass.getConstructor();
+            Object newInstance = constructorDao.newInstance();
+            instanceOfClasses.put(certainClass, newInstance);
+            return newInstance;
+        } catch (IllegalAccessException | InstantiationException
+                | InvocationTargetException | NoSuchMethodException e) {
+            throw new CreateInstanceException("Can't create instance of the class", e);
+        }
+    }
+
+    private void setValueToField(Field field, Object instanceOfClass, Object classToInject) {
+        try {
+            field.setAccessible(true);
+            field.set(instanceOfClass, classToInject);
+        } catch (IllegalAccessException e) {
+            throw new SetValueToFieldException("Can't set value to field ", e);
+        }
     }
 
 
@@ -36,18 +109,19 @@ public class PackageScanner {
      *
      * @param packageName The base package
      * @return The classes
+     * @throws EmptyClassLoaderException if the ClassLoader is null
      * @throws ClassNotFoundException if the class cannot be located
      * @throws IOException            if I/O errors occur
      */
     private static List<Class> getClassesByPackageName(String packageName) throws IOException, ClassNotFoundException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
-            throw new RuntimeException("ClassLoader is null");
+            throw new EmptyClassLoaderException("ClassLoader is null");
         }
         String path = packageName.replace(".", "/");
         Enumeration<URL> classLoaderResources = classLoader.getResources(path);
         List<File> dirs = new ArrayList<>();
-        
+
         classLoaderResources.asIterator().forEachRemaining(resource -> dirs.add(new File(resource.getFile())));
 
         ArrayList<Class> classes = new ArrayList<>();
@@ -66,7 +140,7 @@ public class PackageScanner {
      * @param packageName The package name for classes found inside the base directory
      * @return The classes
      * @throws InvalidFileNameException if directory consist point "."
-     * @throws ClassNotFoundException if the class cannot be located
+     * @throws ClassNotFoundException   if the class cannot be located
      */
     private static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
         List<Class> classes = new ArrayList<>();
