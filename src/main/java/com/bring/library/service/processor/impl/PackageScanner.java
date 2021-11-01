@@ -13,8 +13,8 @@ import java.util.*;
 
 public class PackageScanner {
     private static final Map<String, PackageScanner> PACKAGE_SCANNER_CONTEXT = new HashMap<>();
-    private Map<Class, Object> instanceOfClasses = new HashMap<>();
-    private List<Class> classes = new ArrayList<>();
+    private final Map<Class<?>, Object> instanceOfClasses = new HashMap<>();
+    private final List<Class<?>> classes = new ArrayList<>();
 
     public PackageScanner(String mainPackageName) {
         try {
@@ -33,9 +33,9 @@ public class PackageScanner {
         return packageScanner;
     }
 
-    public Object getBean(Class certainInterface) {
+    public Object getBean(Class<?> certainInterface) {
         Object newInstanceOfClass = null;
-        Class clazz = findClassExtendingInterface(certainInterface);
+        Class<?> clazz = findClassExtendingInterface(certainInterface);
         Field[] declaredFields = clazz.getDeclaredFields();
         if (declaredFields.length == 0) {
             return getNewInstance(clazz);
@@ -113,7 +113,7 @@ public class PackageScanner {
      * @throws ClassNotFoundException if the class cannot be located
      * @throws IOException            if I/O errors occur
      */
-    private static List<Class> getClassesByPackageName(String packageName) throws IOException, ClassNotFoundException {
+    private static List<Class<?>> getClassesByPackageName(String packageName) throws IOException, ClassNotFoundException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             throw new EmptyClassLoaderException("ClassLoader is null");
@@ -124,7 +124,7 @@ public class PackageScanner {
 
         classLoaderResources.asIterator().forEachRemaining(resource -> dirs.add(new File(resource.getFile())));
 
-        ArrayList<Class> classes = new ArrayList<>();
+        ArrayList<Class<?>> classes = new ArrayList<>();
 
         for (File directory : dirs) {
             classes.addAll(findClasses(directory, packageName));
@@ -142,8 +142,8 @@ public class PackageScanner {
      * @throws InvalidFileNameException if directory consist point "."
      * @throws ClassNotFoundException   if the class cannot be located
      */
-    private static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
-        List<Class> classes = new ArrayList<>();
+    private static List<Class<?>> findClasses(File directory, String packageName) throws ClassNotFoundException {
+        List<Class<?>> classes = new ArrayList<>();
         if (!directory.exists()) {
             return classes;
         }
