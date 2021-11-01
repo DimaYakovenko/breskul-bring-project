@@ -22,7 +22,7 @@ public class PackageScanner {
         try {
             classes.addAll(getClassesByPackageName(mainPackageName));
         } catch (IOException | ClassNotFoundException e) {
-            throw new EmptyDirectoryException("Can't get information about all classes", e);
+            throw new ScanPackageException("Can't get information about all classes", e);
         }
     }
 
@@ -67,7 +67,7 @@ public class PackageScanner {
                     if (correctClass == null) {
                         correctClass = clazz;
                     } else {
-                        throw new ClassHasMoreOneInterfacesException("Two or more classes that implement interface "
+                        throw new ScanPackageException("Two or more classes that implement interface "
                                 + certainInterface.getName() + " has annotation Dao or Service)");
                     }
                 }
@@ -100,7 +100,7 @@ public class PackageScanner {
             field.setAccessible(true);
             field.set(instanceOfClass, classToInject);
         } catch (IllegalAccessException e) {
-            throw new SetValueToFieldException("Can't set value to field ", e);
+            throw new IllegalArgumentException("Can't set value to field ", e);
         }
     }
 
@@ -118,7 +118,7 @@ public class PackageScanner {
     private static List<Class<?>> getClassesByPackageName(String packageName) throws IOException, ClassNotFoundException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
-            throw new EmptyClassLoaderException("ClassLoader is null");
+            throw new EmptyClassLoaderException("ClassLoader is empty");
         }
         String path = packageName.replace(".", "/");
         Enumeration<URL> classLoaderResources = classLoader.getResources(path);
