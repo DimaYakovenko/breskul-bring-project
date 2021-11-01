@@ -1,6 +1,6 @@
 package demonstration.project;
 
-import com.bring.library.service.processor.impl.PackageScanner;
+import com.bringframework.service.processor.impl.PackageScanner;
 import demonstration.project.service.ServiceInterface;
 
 public class MainApp {

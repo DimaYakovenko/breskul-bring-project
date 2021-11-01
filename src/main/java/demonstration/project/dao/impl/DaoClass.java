@@ -1,6 +1,6 @@
 package demonstration.project.dao.impl;
 
-import com.bring.library.annotation.Dao;
+import com.bringframework.annotation.Dao;
 import demonstration.project.dao.DaoInterface;
 
 @Dao
