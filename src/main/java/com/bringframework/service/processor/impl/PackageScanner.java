@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.*;
 
 public class PackageScanner {
-    private static final Map<String, PackageScanner> PACKAGE_SCANNER_CONTEXT = new HashMap<>();
+    private static final Map<String, PackageScanner> EXISTING_CLASSES = new HashMap<>();
     private final Map<Class<?>, Object> instanceOfClasses = new HashMap<>();
     private final List<Class<?>> classes = new ArrayList<>();
 
@@ -27,11 +27,11 @@ public class PackageScanner {
     }
 
     public static PackageScanner scanPackage(String mainPackageName) {
-        if (PACKAGE_SCANNER_CONTEXT.containsKey(mainPackageName)) {
-            return PACKAGE_SCANNER_CONTEXT.get(mainPackageName);
+        if (EXISTING_CLASSES.containsKey(mainPackageName)) {
+            return EXISTING_CLASSES.get(mainPackageName);
         }
         PackageScanner packageScanner = new PackageScanner(mainPackageName);
-        PACKAGE_SCANNER_CONTEXT.put(mainPackageName, packageScanner);
+        EXISTING_CLASSES.put(mainPackageName, packageScanner);
         return packageScanner;
     }
 
