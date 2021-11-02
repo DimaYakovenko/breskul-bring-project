@@ -15,6 +15,8 @@ import java.util.*;
 
 public class PackageScanner {
     private static final Map<String, PackageScanner> EXISTING_CLASSES = new HashMap<>();
+    private static final String REGEX_TARGET = ".";
+    private static final String REGEX_REPLACEMENT = "/";
     private final Map<Class<?>, Object> instanceOfClasses = new HashMap<>();
     private final List<Class<?>> classes = new ArrayList<>();
 
@@ -121,7 +123,7 @@ public class PackageScanner {
         if (classLoader == null) {
             throw new EmptyClassLoaderException("ClassLoader is empty");
         }
-        String path = packageName.replace(".", "/");
+        String path = packageName.replace(REGEX_TARGET, REGEX_REPLACEMENT);
         Enumeration<URL> classLoaderResources = classLoader.getResources(path);
         List<File> dirs = new ArrayList<>();
 
