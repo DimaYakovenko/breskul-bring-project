@@ -132,7 +132,8 @@ public class PackageScanner {
         ArrayList<Class<?>> classes = new ArrayList<>();
 
         for (File directory : dirs) {
-            classes.addAll(findClasses(directory, packageName));
+            List<Class<?>> foundClasses = findClasses(directory, packageName);
+            classes.addAll(foundClasses);
         }
         return classes;
     }
