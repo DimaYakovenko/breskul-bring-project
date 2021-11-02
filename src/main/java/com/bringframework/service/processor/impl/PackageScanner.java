@@ -19,6 +19,7 @@ public class PackageScanner {
     private final List<Class<?>> classes = new ArrayList<>();
 
     public PackageScanner(String mainPackageName) {
+        Objects.requireNonNull(mainPackageName);
         try {
             classes.addAll(getClassesByPackageName(mainPackageName));
         } catch (IOException | ClassNotFoundException e) {
