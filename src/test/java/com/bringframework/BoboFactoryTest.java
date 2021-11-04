@@ -1,10 +1,10 @@
 package com.bringframework;
 
 import com.bringframework.configurator.BoboConfigurator;
+import com.bringframework.configurator.BoboConfiguratorScanner;
 import com.bringframework.configurator.InjectAnnotationBoboConfigurator;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
-import com.bringframework.configurator.BoboConfiguratorScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
 import com.bringframework.exception.BoboException;
 import com.bringframework.exception.NoSuchBoboDefinitionException;
@@ -69,14 +69,11 @@ public class BoboFactoryTest {
             boboFactory.getBobo(MyService.class);
         });
 
-        assertEquals(
-                "Cannot instantiate bobo: myServiceImpl",
-                actualException.getMessage()
-        );
+        assertEquals("Cannot instantiate bobo: myServiceImpl", actualException.getMessage());
         assertTrue(actualException.getCause() instanceof AmbiguousBoboDefinitionException);
         assertEquals(
                 "No qualifying bobo of type 'demonstration.project.dao.MyDao' available: expected single matching bobo but found 2:",
-        actualException.getCause().getMessage().substring(0, 114)
+                actualException.getCause().getMessage().substring(0, 114)
         );
         assertTrue(actualException.getCause().getMessage().substring(114).contains("myDaoImpl"));
         assertTrue(actualException.getCause().getMessage().substring(114).contains("myDaoImpl1"));
