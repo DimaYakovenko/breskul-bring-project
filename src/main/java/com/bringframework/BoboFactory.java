@@ -29,13 +29,17 @@ public class BoboFactory {
 
     public <T> T getBobo(Class<T> type) {
         List<BoboDefinition> candidates = findCandidates(type);
-        if (candidates.size() == 0) throw new NoSuchBoboDefinitionException("No such bobo definition for type '" + type.getSimpleName() + "'");
-        if (candidates.size() > 1) throw new AmbiguousBoboDefinitionException(
-                String.format(
-                        "No qualifying bobo of type '%s' available: expected single matching bobo but found %d: %s",
-                        type.getCanonicalName(),
-                        candidates.size(),
-                        candidates.stream().map(BoboDefinition::getBoboName).collect(joining(", "))));
+        if (candidates.size() == 0) {
+            throw new NoSuchBoboDefinitionException("No such bobo definition for type '" + type.getSimpleName() + "'");
+        }
+        if (candidates.size() > 1) {
+            throw new AmbiguousBoboDefinitionException(
+                    String.format(
+                            "No qualifying bobo of type '%s' available: expected single matching bobo but found %d: %s",
+                            type.getCanonicalName(),
+                            candidates.size(),
+                            candidates.stream().map(BoboDefinition::getBoboName).collect(joining(", "))));
+        }
 
         BoboDefinition definition = candidates.get(0);
         Object singletonBobo = registry.get(definition);
@@ -74,9 +78,13 @@ public class BoboFactory {
     }
 
     private <T> boolean isTypeOfInterface(Class<?> boboClass, Class<T> type) {
-        if (!type.isInterface()) return false;
+        if (!type.isInterface()) {
+            return false;
+        }
         for (Class<?> classInterface : boboClass.getInterfaces()) {
-            if (classInterface == type) return true;
+            if (classInterface == type) {
+                return true;
+            }
         }
         return false;
     }
