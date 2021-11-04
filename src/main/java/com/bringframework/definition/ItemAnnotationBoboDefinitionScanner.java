@@ -1,7 +1,6 @@
 package com.bringframework.definition;
 
 import com.bringframework.annotation.Item;
-import lombok.SneakyThrows;
 import org.reflections.Reflections;
 
 import java.util.List;
@@ -14,7 +13,6 @@ public class ItemAnnotationBoboDefinitionScanner {
 
     private final Reflections scanner;
 
-    @SneakyThrows
     public ItemAnnotationBoboDefinitionScanner(String packageToScan) {
         scanner = new Reflections(packageToScan);
     }

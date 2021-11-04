@@ -1,7 +1,6 @@
 package com.bringframework.configurator;
 
 import com.bringframework.exception.BoboException;
-import lombok.SneakyThrows;
 import org.reflections.Reflections;
 
 import java.util.List;
@@ -14,7 +13,6 @@ public class BoboConfiguratorScanner {
         scanner = new Reflections("com.bringframework", packageToScan);
     }
 
-    @SneakyThrows
     public List<BoboConfigurator> scan() {
         return scanner.getSubTypesOf(BoboConfigurator.class)
                 .stream()
