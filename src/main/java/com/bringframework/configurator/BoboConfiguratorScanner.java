@@ -10,7 +10,7 @@ public class BoboConfiguratorScanner {
     private final Reflections scanner;
 
     public BoboConfiguratorScanner(String packageToScan) {
-        scanner = new Reflections("com.bringframework", packageToScan);
+        scanner = new Reflections("com.bringframework.configurator", packageToScan);
     }
 
     public List<BoboConfigurator> scan() {

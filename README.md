@@ -25,12 +25,9 @@ public class MyService {
     ...    
 }
 ```
-To have this class injected, we'll need to create an BoboFactory and configure it
+To have this class injected, we'll need to create an BoboRegistry and configure it
 properly:
 ```java
-List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("package_to_scan").scan();
-List<BoboConfigurator> configurators = new BoboConfiguratorScanner("package_to_scan").scan();
-
-BoboFactory boboFactory = new BoboFactory(definitions, configurators);
+BoboRegistry boboFactory = new BoboRegistry("package_to_scan");
 MyService bobo = boboFactory.getBobo(MyService.class);
 ```

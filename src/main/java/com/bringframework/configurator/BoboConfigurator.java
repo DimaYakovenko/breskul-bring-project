@@ -1,7 +1,7 @@
 package com.bringframework.configurator;
 
-import com.bringframework.BoboFactory;
+import com.bringframework.BoboRegistry;
 
 public interface BoboConfigurator {
-    void configure(Object bobo, BoboFactory registry);
+    void configure(Object bobo, BoboRegistry registry);
 }

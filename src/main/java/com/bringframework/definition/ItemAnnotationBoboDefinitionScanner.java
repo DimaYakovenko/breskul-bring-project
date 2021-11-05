@@ -24,7 +24,7 @@ public class ItemAnnotationBoboDefinitionScanner {
                 .collect(Collectors.toList());
     }
 
-    private BoboDefinition buildDefinition(Class<?> type) {
+    public BoboDefinition buildDefinition(Class<?> type) {
         return BoboDefinition.builder()
                 .boboName(generateBoboName(type))
                 .boboClass(type)
