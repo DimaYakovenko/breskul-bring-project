@@ -21,9 +21,9 @@ public class BoboFactory {
     private final Map<BoboDefinition, Object> registry;
     private final List<BoboConfigurator> configurators;
 
-    public BoboFactory(List<BoboDefinition> boboDefinitionsList, List<BoboConfigurator> configurators) {
-        this.registry = new ConcurrentHashMap<>();
-        boboDefinitionsList.forEach(definition -> registry.put(definition, EMPTY));
+    public BoboFactory(List<BoboDefinition> boboDefinitions, List<BoboConfigurator> configurators) {
+        registry = new ConcurrentHashMap<>();
+        boboDefinitions.forEach(definition -> registry.put(definition, EMPTY));
         this.configurators = configurators;
     }
 
@@ -57,8 +57,9 @@ public class BoboFactory {
     //TODO check method add tests
     public Object getBobo(String boboName) {
         BoboDefinition definitionByName = registry.keySet().stream()
-                .filter(o -> o.getBoboName().equals(boboName))
-                .findFirst().orElseThrow(() -> new NoSuchBoboDefinitionException("No such bobo definition: '" + boboName +"'"));
+                .filter(definition -> definition.getBoboName().equals(boboName))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchBoboDefinitionException("No such bobo definition: '" + boboName +"'"));
 
         Object singletonBobo = registry.get(definitionByName);
         if (singletonBobo != EMPTY) {

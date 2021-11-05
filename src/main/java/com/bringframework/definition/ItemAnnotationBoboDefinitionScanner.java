@@ -20,8 +20,15 @@ public class ItemAnnotationBoboDefinitionScanner {
     public List<BoboDefinition> scan() {
         Set<Class<?>> itemClasses = scanner.getTypesAnnotatedWith(Item.class);
         return itemClasses.stream()
-                .map(type -> BoboDefinition.builder().boboName(generateBoboName(type)).boboClass(type).build())
+                .map(this::buildDefinition)
                 .collect(Collectors.toList());
+    }
+
+    private BoboDefinition buildDefinition(Class<?> type) {
+        return BoboDefinition.builder()
+                .boboName(generateBoboName(type))
+                .boboClass(type)
+                .build();
     }
 
     private String generateBoboName(Class<?> type) {

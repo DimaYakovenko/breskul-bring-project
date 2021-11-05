@@ -20,7 +20,19 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BoboFactoryTest {
 
     @Test
-    public void getBoboByTypeTest() {
+    public void getBoboByType_whenGetBoboByType_returnValidBobo() {
+        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
+        List<BoboConfigurator> configurators = new BoboConfiguratorScanner("demonstration.project").scan();
+
+        BoboFactory boboFactory = new BoboFactory(definitions, configurators);
+
+        MyService myService = boboFactory.getBobo(MyService.class);
+        assertNotNull(myService);
+        assertEquals("It is alive!!!! \uD83D\uDE02 \uD83D\uDE02 \uD83D\uDE02", myService.showMe());
+    }
+
+    @Test
+    public void getBoboByType_whenGetTwoSingletonBobo_shouldReturnTheSameInstance() {
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner("demonstration.project").scan();
 
@@ -30,42 +42,46 @@ public class BoboFactoryTest {
         assertNotNull(bobo);
         MyService bobo2 = boboFactory.getBobo(MyService.class);
         assertNotNull(bobo2);
-        assertEquals(bobo.hashCode(), bobo2.hashCode());
-        assertEquals("It is alive!!!! \uD83D\uDE02 \uD83D\uDE02 \uD83D\uDE02", bobo.showMe());
+        assertEquals(bobo, bobo2);
     }
 
     @Test
     public void getBoboByType_whenBoboDefinitionNotFound_throwNoSuchBoboDefinitionException() {
+        BoboFactory boboFactory = new BoboFactory(emptyList(), emptyList());
+
         Exception exception = assertThrows(NoSuchBoboDefinitionException.class, () -> {
-            BoboFactory boboFactory = new BoboFactory(emptyList(), emptyList());
             boboFactory.getBobo(MyService.class);
         });
 
-        assertEquals("No such bobo definition for type 'MyService'", exception.getMessage());
+        assertEquals("No such bobo definition for type '" + MyService.class.getSimpleName() + "'", exception.getMessage());
     }
 
     @Test
     public void getBoboByType_whenBoboDefinitionMoreThenOneFound_throwAmbiguousBoboDefinitionException() {
+        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
+        definitions.add(BoboDefinition.builder().boboName("dao").boboClass(MyDaoImpl.class).build());
+        BoboFactory boboFactory = new BoboFactory(definitions, List.of(new InjectAnnotationBoboConfigurator()));
+
         AmbiguousBoboDefinitionException actualException = assertThrows(AmbiguousBoboDefinitionException.class, () -> {
-            List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
-            definitions.add(BoboDefinition.builder().boboName("dao").boboClass(MyDaoImpl.class).build());
-            BoboFactory boboFactory = new BoboFactory(definitions, List.of(new InjectAnnotationBoboConfigurator()));
             boboFactory.getBobo(MyDaoImpl.class);
         });
         assertEquals(
                 "No qualifying bobo of type 'demonstration.project.dao.impl.MyDaoImpl' available: expected single matching bobo but found 2:",
                 actualException.getMessage().substring(0, 123)
         );
-        assertTrue(actualException.getMessage().substring(124).contains("dao"));
-        assertTrue(actualException.getMessage().substring(124).contains("myDaoImpl"));
+        String boboNameList = actualException.getMessage().substring(124);
+        assertTrue(boboNameList.contains("dao"));
+        assertTrue(boboNameList.contains("myDaoImpl"));
     }
 
     @Test
-    public void getBoboByType_whenBoboDefinitionMoreThenOneFound_throwBoboExceptionWithNestedAmbiguousBoboDefinitionException() {
+    public void getBoboByType_whenBoboDefinitionMoreThanOneFound_throwBoboExceptionWithNestedAmbiguousBoboDefinitionException() {
+        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
+        definitions.add(BoboDefinition.builder().boboName("myDaoImpl1").boboClass(MyDaoImpl.class).build());
+        List<BoboConfigurator> configurators = List.of(new InjectAnnotationBoboConfigurator());
+        BoboFactory boboFactory = new BoboFactory(definitions, configurators);
+
         BoboException actualException = assertThrows(BoboException.class, () -> {
-            List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
-            definitions.add(BoboDefinition.builder().boboName("myDaoImpl1").boboClass(MyDaoImpl.class).build());
-            BoboFactory boboFactory = new BoboFactory(definitions, List.of(new InjectAnnotationBoboConfigurator()));
             boboFactory.getBobo(MyService.class);
         });
 
@@ -75,7 +91,8 @@ public class BoboFactoryTest {
                 "No qualifying bobo of type 'demonstration.project.dao.MyDao' available: expected single matching bobo but found 2:",
                 actualException.getCause().getMessage().substring(0, 114)
         );
-        assertTrue(actualException.getCause().getMessage().substring(114).contains("myDaoImpl"));
-        assertTrue(actualException.getCause().getMessage().substring(114).contains("myDaoImpl1"));
+        String boboNameList = actualException.getCause().getMessage().substring(114);
+        assertTrue(boboNameList.contains("myDaoImpl"));
+        assertTrue(boboNameList.contains("myDaoImpl1"));
     }
 }
