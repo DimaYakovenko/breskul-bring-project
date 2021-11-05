@@ -48,12 +48,13 @@ public class BoboFactoryTest {
     @Test
     public void getBoboByType_whenBoboDefinitionNotFound_throwNoSuchBoboDefinitionException() {
         BoboFactory boboFactory = new BoboFactory(emptyList(), emptyList());
+        Class<MyService> myBoboClass = MyService.class;
 
         Exception exception = assertThrows(NoSuchBoboDefinitionException.class, () -> {
-            boboFactory.getBobo(MyService.class);
+            boboFactory.getBobo(myBoboClass);
         });
 
-        assertEquals("No such bobo definition for type '" + MyService.class.getSimpleName() + "'", exception.getMessage());
+        assertEquals("No such bobo definition for type '" + myBoboClass.getSimpleName() + "'", exception.getMessage());
     }
 
     @Test
