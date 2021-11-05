@@ -21,10 +21,10 @@ public class BoboRegistry {
     private final ItemAnnotationBoboDefinitionScanner definitionScanner;
 
     public BoboRegistry(String packageToScan) {
-        definitionScanner = new ItemAnnotationBoboDefinitionScanner(packageToScan);
-        registry = new ConcurrentHashMap<>();
-        definitionScanner.scan().forEach(definition -> registry.put(definition, EMPTY));
         factory = new BoboFactory(this, packageToScan);
+        registry = new ConcurrentHashMap<>();
+        definitionScanner = new ItemAnnotationBoboDefinitionScanner(packageToScan);
+        definitionScanner.scan().forEach(definition -> registry.put(definition, EMPTY));
     }
 
     public <T> T getBobo(Class<T> type) {
@@ -63,6 +63,10 @@ public class BoboRegistry {
             BoboDefinition boboDefinition = definitionScanner.buildDefinition(itemClass);
             registry.put(boboDefinition, EMPTY);
         }
+    }
+
+    public boolean containsBobo(String boboName) {
+        return registry.keySet().stream().anyMatch(definition -> definition.getBoboName().equals(boboName));
     }
 
     private <T> List<BoboDefinition> findCandidates(Class<T> type) {
