@@ -20,9 +20,9 @@ public class BoboFactory {
         this.configurators = configuratorScanner.scan();
     }
 
-    public <T> T createBobo(BoboDefinition definition) {
+    public Object createBobo(BoboDefinition definition) {
         try {
-            T newBobo = instantiate(definition);
+            Object newBobo = instantiate(definition);
 
             configure(newBobo);
 
@@ -31,7 +31,7 @@ public class BoboFactory {
             return newBobo;
 
         } catch (Exception e) {
-            throw new BoboException("Cannot instantiate bobo: " + definition.getBoboName(), e);
+            throw new BoboException("Cannot create bobo: " + definition.getBoboName(), e);
         }
     }
 

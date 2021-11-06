@@ -42,16 +42,20 @@ public class BoboRegistry {
         }
 
         BoboDefinition definition = candidates.get(0);
-        return getOrCreateBean(definition, type);
+        return type.cast(getOrCreateBobo(definition));
     }
 
     public <T> T getBobo(String boboName, Class<T> type) {
+        return type.cast(getBobo(boboName));
+    }
+
+    public Object getBobo(String boboName) {
         BoboDefinition definitionByName = registry.keySet().stream()
                 .filter(definition -> definition.getBoboName().equals(boboName))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchBoboDefinitionException("No such bobo definition: '" + boboName + "'"));
 
-        return getOrCreateBean(definitionByName, type);
+        return getOrCreateBobo(definitionByName);
     }
 
     public void registerBoboDefinition(BoboDefinition definition) {
@@ -60,13 +64,13 @@ public class BoboRegistry {
 
     public void register(Class<?>... itemsClasses) {
         for (Class<?> itemClass : itemsClasses) {
-            BoboDefinition boboDefinition = definitionScanner.buildDefinition(itemClass);
-            registry.put(boboDefinition, EMPTY);
+            registerBoboDefinition(definitionScanner.buildDefinition(itemClass));
         }
     }
 
     public boolean containsBobo(String boboName) {
-        return registry.keySet().stream().anyMatch(definition -> definition.getBoboName().equals(boboName));
+        return registry.entrySet().stream()
+                .anyMatch(entry -> entry.getKey().getBoboName().equals(boboName) && entry.getValue() != EMPTY);
     }
 
     private <T> List<BoboDefinition> findCandidates(Class<T> type) {
@@ -87,16 +91,15 @@ public class BoboRegistry {
         return false;
     }
 
-    private <T> T getOrCreateBean(BoboDefinition definition, Class<T> type) {
+    private Object getOrCreateBobo(BoboDefinition definition) {
         Object singletonBobo = registry.get(definition);
         if (singletonBobo != EMPTY) {
-            return type.cast(singletonBobo);
+            return singletonBobo;
         }
 
-        T newBobo = factory.createBobo(definition);
-        if (definition.getBoboClass().isAnnotationPresent(Item.class)) {
-            registry.put(definition, newBobo);
-        }
+        Object newBobo = factory.createBobo(definition);
+        registry.put(definition, newBobo);
+
         return newBobo;
     }
 
