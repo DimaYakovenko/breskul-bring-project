@@ -18,6 +18,7 @@
         <reflections.version>0.10.2</reflections.version>
         <slf4j-api.version>1.7.32</slf4j-api.version>
         <mockito-core.version>4.0.0</mockito-core.version>
+        <mockito-inline.version>4.0.0</mockito-inline.version>
         <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>2.22.0</maven-failsafe-plugin.version>
     </properties>
@@ -49,6 +50,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${mockito-inline.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

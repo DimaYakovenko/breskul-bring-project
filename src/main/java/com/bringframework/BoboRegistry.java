@@ -25,16 +25,15 @@ public class BoboRegistry {
         factory = new BoboFactory(this);
     }
 
-    public BoboRegistry(String basePackages) {
+    public BoboRegistry(String... basePackages) {
         factory = new BoboFactory(this, basePackages);
-        scan(basePackages);
-        refresh();
+        ItemAnnotationBoboDefinitionScanner.scan(basePackages)
+                .forEach(definition -> registry.put(definition, factory.createBobo(definition)));
     }
 
     public BoboRegistry(Class<?>... itemClasses) {
         this();
         register(itemClasses);
-        refresh();
     }
 
     public <T> T getBobo(Class<T> type) {
@@ -46,7 +45,9 @@ public class BoboRegistry {
         if (candidates.size() > 1) {
             throw new AmbiguousBoboDefinitionException(String.format(
                     AMBIGUOUS_BOBO_ERROR, type.getCanonicalName(), candidates.size(),
-                    candidates.stream().map(BoboDefinition::getBoboName).collect(joining(", ")))
+                    candidates.stream()
+                            .map(BoboDefinition::getBoboName)
+                            .collect(joining(", ")))
             );
         }
 
@@ -67,41 +68,31 @@ public class BoboRegistry {
         return getOrCreateBobo(definitionByName);
     }
 
-    public void registerBoboDefinition(BoboDefinition definition) {
-        registry.put(definition, EMPTY);
-    }
-
     public void register(Class<?>... itemsClasses) {
         for (Class<?> itemClass : itemsClasses) {
             registerBoboDefinition(ItemAnnotationBoboDefinitionScanner.buildDefinition(itemClass));
         }
     }
 
-    public boolean containsBobo(String boboName) {
-        return registry.entrySet().stream()
-                .anyMatch(entry -> entry.getKey().getBoboName().equals(boboName) && entry.getValue() != EMPTY);
-    }
-
     public void scan(String... basePackages) {
         ItemAnnotationBoboDefinitionScanner.scan(basePackages).forEach(definition -> registry.put(definition, EMPTY));
-    }
-
-    public void refresh() {
-        registry.replaceAll((definition, singleton) -> EMPTY);
-        registry.replaceAll((definition, singleton) -> getBobo(definition.getBoboName()));
     }
 
     public void addBoboConfigurator(BoboConfigurator boboConfigurator) {
         factory.addBoboConfigurator(boboConfigurator);
     }
 
-    private <T> List<BoboDefinition> findCandidates(Class<T> type) {
+    private void registerBoboDefinition(BoboDefinition definition) {
+        registry.put(definition, factory.createBobo(definition));
+    }
+
+    private List<BoboDefinition> findCandidates(Class<?> type) {
         return registry.keySet().stream()
                 .filter(definition -> definition.getBoboClass() == type || isTypeOfInterface(definition.getBoboClass(), type))
                 .collect(toList());
     }
 
-    private <T> boolean isTypeOfInterface(Class<?> boboClass, Class<T> type) {
+    private boolean isTypeOfInterface(Class<?> boboClass, Class<?> type) {
         if (!type.isInterface()) {
             return false;
         }

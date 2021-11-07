@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BoboConfiguratorScanner {
+    public static final String DEFAULT_PACKAGE = "com.bringframework.configurator";
 
     public static List<BoboConfigurator> scan(String... packageToScan) {
         return new Reflections(packageToScan, Scanners.SubTypes)
