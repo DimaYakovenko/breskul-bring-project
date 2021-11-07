@@ -1,5 +1,6 @@
 package com.bringframework;
 
+import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
@@ -81,6 +82,10 @@ public class BoboRegistry {
     public void refresh() {
         registry.replaceAll((definition, singleton) -> EMPTY);
         registry.replaceAll((definition, singleton) -> getBobo(definition.getBoboName()));
+    }
+
+    public void addBoboConfigurator(BoboConfigurator boboConfigurator) {
+        factory.addBoboConfigurator(boboConfigurator);
     }
 
     private <T> List<BoboDefinition> findCandidates(Class<T> type) {
