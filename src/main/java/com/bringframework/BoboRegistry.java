@@ -1,6 +1,5 @@
 package com.bringframework;
 
-import com.bringframework.annotation.Item;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
@@ -16,15 +15,17 @@ import static java.util.stream.Collectors.toList;
 public class BoboRegistry {
 
     private final static Object EMPTY = new Object();
-    private final Map<BoboDefinition, Object> registry;
+    private final Map<BoboDefinition, Object> registry = new ConcurrentHashMap<>();
     private final BoboFactory factory;
-    private final ItemAnnotationBoboDefinitionScanner definitionScanner;
 
-    public BoboRegistry(String packageToScan) {
-        factory = new BoboFactory(this, packageToScan);
-        registry = new ConcurrentHashMap<>();
-        definitionScanner = new ItemAnnotationBoboDefinitionScanner(packageToScan);
-        definitionScanner.scan().forEach(definition -> registry.put(definition, EMPTY));
+    public BoboRegistry() {
+        factory = new BoboFactory(this);
+    }
+
+    public BoboRegistry(String basePackages) {
+        factory = new BoboFactory(this, basePackages);
+        scan(basePackages);
+        refresh();
     }
 
     public <T> T getBobo(Class<T> type) {
@@ -64,13 +65,22 @@ public class BoboRegistry {
 
     public void register(Class<?>... itemsClasses) {
         for (Class<?> itemClass : itemsClasses) {
-            registerBoboDefinition(definitionScanner.buildDefinition(itemClass));
+            registerBoboDefinition(ItemAnnotationBoboDefinitionScanner.buildDefinition(itemClass));
         }
     }
 
     public boolean containsBobo(String boboName) {
         return registry.entrySet().stream()
                 .anyMatch(entry -> entry.getKey().getBoboName().equals(boboName) && entry.getValue() != EMPTY);
+    }
+
+    public void scan(String... basePackages) {
+        ItemAnnotationBoboDefinitionScanner.scan(basePackages).forEach(definition -> registry.put(definition, EMPTY));
+    }
+
+    public void refresh() {
+        registry.replaceAll((definition, singleton) -> EMPTY);
+        registry.replaceAll((definition, singleton) -> getBobo(definition.getBoboName()));
     }
 
     private <T> List<BoboDefinition> findCandidates(Class<T> type) {

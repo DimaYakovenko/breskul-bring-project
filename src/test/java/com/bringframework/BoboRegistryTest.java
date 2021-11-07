@@ -67,9 +67,7 @@ public class BoboRegistryTest {
         BoboRegistry boboRegistry = new BoboRegistry("demonstration.project");
         boboRegistry.registerBoboDefinition(BoboDefinition.builder().boboName("myDaoImpl1").boboClass(MyDaoImpl.class).build());
 
-        BoboException actualException = assertThrows(BoboException.class, () -> {
-            boboRegistry.getBobo(MyService.class);
-        });
+        BoboException actualException = assertThrows(BoboException.class, boboRegistry::refresh);
 
         assertEquals("Cannot create bobo: myServiceImpl", actualException.getMessage());
         assertTrue(actualException.getCause() instanceof AmbiguousBoboDefinitionException);

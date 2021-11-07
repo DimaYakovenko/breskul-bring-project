@@ -7,6 +7,7 @@ import com.bringframework.exception.BoboException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 public class BoboFactory {
@@ -14,10 +15,20 @@ public class BoboFactory {
     private final List<BoboConfigurator> configurators;
     private final BoboRegistry registry;
 
-    public BoboFactory(BoboRegistry registry, String packageToScan) {
+    public BoboFactory(BoboRegistry registry) {
         this.registry = registry;
-        BoboConfiguratorScanner configuratorScanner = new BoboConfiguratorScanner(packageToScan);
-        this.configurators = configuratorScanner.scan();
+        this.configurators = BoboConfiguratorScanner.scan("com.bringframework.configurator");
+    }
+
+    public BoboFactory(BoboRegistry registry, String... configuratorsPackages) {
+        this.registry = registry;
+        if (configuratorsPackages == null) {
+            this.configurators = BoboConfiguratorScanner.scan("com.bringframework.configurator");
+        } else {
+            String[] packages = Arrays.copyOf(configuratorsPackages, configuratorsPackages.length + 1);
+            packages[configuratorsPackages.length] = "com.bringframework.configurator";
+            this.configurators = BoboConfiguratorScanner.scan(packages);
+        }
     }
 
     public Object createBobo(BoboDefinition definition) {
