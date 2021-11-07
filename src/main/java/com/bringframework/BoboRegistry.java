@@ -29,6 +29,12 @@ public class BoboRegistry {
         refresh();
     }
 
+    public BoboRegistry(Class<?>... itemClasses) {
+        this();
+        register(itemClasses);
+        refresh();
+    }
+
     public <T> T getBobo(Class<T> type) {
         List<BoboDefinition> candidates = findCandidates(type);
         if (candidates.size() == 0) {

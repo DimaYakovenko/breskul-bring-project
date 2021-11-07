@@ -6,6 +6,7 @@ import com.bringframework.exception.BoboException;
 import com.bringframework.exception.NoSuchBoboDefinitionException;
 import demonstration.project.dao.impl.MyDaoImpl;
 import demonstration.project.service.MyService;
+import demonstration.project.service.impl.MyServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -128,5 +129,13 @@ public class BoboRegistryTest {
         boboRegistry.register(MyDaoImpl.class);
         boboRegistry.getBobo(MyDaoImpl.class);
         assertTrue(boboRegistry.containsBobo("myDaoImpl"));
+    }
+
+
+    @Test
+    public void whenManuallyAddedItemClassesInConstructor_shouldPutThemInRegistry() {
+        BoboRegistry boboRegistry = new BoboRegistry(MyServiceImpl.class, MyDaoImpl.class);
+        assertTrue(boboRegistry.containsBobo("myDaoImpl"));
+        assertTrue(boboRegistry.containsBobo("myServiceImpl"));
     }
 }
