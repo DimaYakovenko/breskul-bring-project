@@ -22,9 +22,9 @@ public class BoboFactory {
         this.configurators = configuratorScanner.scan();
     }
 
-    public <T> T createBobo(BoboDefinition definition) {
+    public Object createBobo(BoboDefinition definition) {
         try {
-            T newBobo = instantiate(definition);
+            Object newBobo = instantiate(definition);
 
             invokeInit(definition, newBobo);
 

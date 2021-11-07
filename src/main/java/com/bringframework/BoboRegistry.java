@@ -48,23 +48,26 @@ public class BoboRegistry {
     }
 
     public <T> T getBobo(String boboName, Class<T> type) {
+        return type.cast(getBobo(boboName));
+    }
+
+    public Object getBobo(String boboName) {
         BoboDefinition boboDefinition = registry.keySet().stream()
                 .filter(definition -> definition.getBoboName().equals(boboName))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, boboName)));
 
-        Object singletonBobo = registry.get(boboDefinition);
-        return type.cast(singletonBobo);
+        return registry.get(boboDefinition);
+    }
+
+    public boolean containsBobo(String boboName) {
+        return registry.keySet().stream().anyMatch(definition -> definition.getBoboName().equals(boboName));
     }
 
     private void registerBobo(BoboDefinition boboDefinition) {
         if (boboDefinition.getBoboClass().isAnnotationPresent(Item.class)) {
             registry.put(boboDefinition, factory.createBobo(boboDefinition));
         }
-    }
-
-    public boolean containsBobo(String boboName) {
-        return registry.keySet().stream().anyMatch(definition -> definition.getBoboName().equals(boboName));
     }
 
     private <T> List<BoboDefinition> findCandidates(Class<T> type) {
