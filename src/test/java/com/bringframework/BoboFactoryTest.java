@@ -3,12 +3,10 @@ package com.bringframework;
 import com.bringframework.definition.BoboDefinition;
 import items.dao.FakeUserRepository;
 import items.dao.impl.FakeUserRepositoryImpl;
-import items.service.FakeUserService;
 import items.service.impl.FakeUserServiceImpl;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
@@ -17,12 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class BoboFactoryTest extends BaseTest {
-
+public class BoboFactoryTest {
+    protected static final String PACKAGE_TO_SCAN = "items";
     private BoboRegistry mockRegistry;
 
     @BeforeEach
@@ -34,8 +31,7 @@ public class BoboFactoryTest extends BaseTest {
     @SneakyThrows
     void shouldCreateBoboFromBoboDefinition() {
         // Given
-        BoboRegistry registry = Mockito.mock(BoboRegistry.class);
-        BoboFactory factory = new BoboFactory(registry, PACKAGE_TO_SCAN);
+        BoboFactory factory = new BoboFactory(mockRegistry, PACKAGE_TO_SCAN);
         Class<FakeUserServiceImpl> boboType = FakeUserServiceImpl.class;
         BoboDefinition boboDefinition = BoboDefinition.builder()
                 .boboClass(boboType)
@@ -43,7 +39,7 @@ public class BoboFactoryTest extends BaseTest {
                 .build();
 
         // When
-        FakeUserService bobo = factory.createBobo(boboDefinition);
+        FakeUserServiceImpl bobo = (FakeUserServiceImpl) factory.createBobo(boboDefinition);
 
         // Then
         assertInstanceOf(FakeUserServiceImpl.class, bobo);
@@ -53,49 +49,20 @@ public class BoboFactoryTest extends BaseTest {
 
     @Test
     @SneakyThrows
-    void shouldConfigureBoboWithInjectedField() {
+    void createBobo_whenCreateBoboWithInnerDependency_shouldCallBoboRegistryGetBoboForThatDependency() {
         // Given
-        BoboRegistry registry = new BoboRegistry("does.not.exist");
-        BoboFactory factory = new BoboFactory(registry, PACKAGE_TO_SCAN);
-        Class<FakeUserServiceImpl> serviceBoboType = FakeUserServiceImpl.class;
-        Class<FakeUserRepositoryImpl> repositoryBoboType = FakeUserRepositoryImpl.class;
-        BoboDefinition userServiceBoboDefinition = BoboDefinition.builder()
-                .boboClass(serviceBoboType)
-                .boboName(decapitalize(serviceBoboType.getSimpleName()))
-                .build();
-        BoboDefinition userRepositoryBoboDefinition = BoboDefinition.builder()
-                .boboClass(repositoryBoboType)
-                .boboName(decapitalize(repositoryBoboType.getSimpleName()))
-                .build();
-        FakeUserService boboService = factory.createBobo(userServiceBoboDefinition);
-        FakeUserRepository userRepo = factory.createBobo(userRepositoryBoboDefinition);
-        registerBobo(registry, userRepositoryBoboDefinition, userRepo);
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenReturn(new FakeUserRepositoryImpl());
+        BoboFactory factory = new BoboFactory(mockRegistry, PACKAGE_TO_SCAN);
+        FakeUserServiceImpl userServiceBobo = (FakeUserServiceImpl) factory.createBobo(BoboDefinition.builder().boboClass(FakeUserServiceImpl.class).boboName("myServiceImpl").build());
 
         // When
-        factory.configure(boboService);
+        factory.configure(userServiceBobo);
 
         // Then
-        Field fakeUserRepository = boboService.getClass().getDeclaredField("fakeUserRepository");
+        Field fakeUserRepository = userServiceBobo.getClass().getDeclaredField("fakeUserRepository");
         fakeUserRepository.setAccessible(true);
         assertEquals(FakeUserRepository.class.getSimpleName(), fakeUserRepository.getType().getSimpleName());
-        assertNotNull(fakeUserRepository.get(boboService));
-    }
-
-    @Test
-    void createBobo_whenCreateBoboFromValidBoboDefinition_returnValidObject() {
-        BoboFactory factory = new BoboFactory(mockRegistry, "no-matter");
-        MyDaoImpl myDaoImpl = (MyDaoImpl) factory.createBobo(BoboDefinition.builder().boboClass(MyDaoImpl.class).boboName("myDaoImpl").build());
-        assertNotNull(myDaoImpl);
-        assertEquals("It is alive!!!! \uD83D\uDE02 \uD83D\uDE02 \uD83D\uDE02", myDaoImpl.showMe());
-    }
-
-    @Test
-    void createBobo_whenCreateBoboWithInnerDependency_shouldCallBoboRegistryGetBoboForThatDependency() {
-        when(mockRegistry.getBobo(MyDao.class)).thenReturn(new MyDaoImpl());
-        BoboFactory factory = new BoboFactory(mockRegistry, "demonstration.project");
-        MyServiceImpl myService = (MyServiceImpl) factory.createBobo(BoboDefinition.builder().boboClass(MyServiceImpl.class).boboName("myServiceImpl").build());
-        assertNotNull(myService);
-        assertEquals("It is alive!!!! \uD83D\uDE02 \uD83D\uDE02 \uD83D\uDE02", myService.showMe());
-        verify(mockRegistry, times(1)).getBobo(MyDao.class);
+        assertNotNull(fakeUserRepository.get(userServiceBobo));
+        verify(mockRegistry).getBobo(FakeUserRepository.class);
     }
 }
