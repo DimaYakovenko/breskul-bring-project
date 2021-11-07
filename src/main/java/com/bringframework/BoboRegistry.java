@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.bringframework.exception.ExceptionErrorMessage.AMBIGUOUS_BOBO_ERROR;
+import static com.bringframework.exception.ExceptionErrorMessage.NO_SUCH_BOBO_DEFINIITON_ERROR;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class BoboRegistry {
 
-    private final static Object EMPTY = new Object();
     private final Map<BoboDefinition, Object> registry;
     private final BoboFactory factory;
     private final ItemAnnotationBoboDefinitionScanner definitionScanner;
@@ -24,44 +25,41 @@ public class BoboRegistry {
         factory = new BoboFactory(this, packageToScan);
         registry = new ConcurrentHashMap<>();
         definitionScanner = new ItemAnnotationBoboDefinitionScanner(packageToScan);
-        definitionScanner.scan().forEach(definition -> registry.put(definition, EMPTY));
+        definitionScanner.scan().forEach(this::registerBobo);
+        registry.values().forEach(factory::configure);
     }
 
     public <T> T getBobo(Class<T> type) {
         List<BoboDefinition> candidates = findCandidates(type);
         if (candidates.size() == 0) {
-            throw new NoSuchBoboDefinitionException("No such bobo definition for type '" + type.getSimpleName() + "'");
+            throw new NoSuchBoboDefinitionException(
+                    String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, type.getSimpleName()));
         }
         if (candidates.size() > 1) {
             throw new AmbiguousBoboDefinitionException(String.format(
-                    "No qualifying bobo of type '%s' available: expected single matching bobo but found %d: %s",
-                    type.getCanonicalName(),
-                    candidates.size(),
+                    AMBIGUOUS_BOBO_ERROR, type.getCanonicalName(), candidates.size(),
                     candidates.stream().map(BoboDefinition::getBoboName).collect(joining(", ")))
             );
         }
 
-        BoboDefinition definition = candidates.get(0);
-        return getOrCreateBean(definition, type);
+        BoboDefinition boboDefinition = candidates.get(0);
+        Object singletonBobo = registry.get(boboDefinition);
+        return type.cast(singletonBobo);
     }
 
     public <T> T getBobo(String boboName, Class<T> type) {
-        BoboDefinition definitionByName = registry.keySet().stream()
+        BoboDefinition boboDefinition = registry.keySet().stream()
                 .filter(definition -> definition.getBoboName().equals(boboName))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchBoboDefinitionException("No such bobo definition: '" + boboName + "'"));
+                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, boboName)));
 
-        return getOrCreateBean(definitionByName, type);
+        Object singletonBobo = registry.get(boboDefinition);
+        return type.cast(singletonBobo);
     }
 
-    public void registerBoboDefinition(BoboDefinition definition) {
-        registry.put(definition, EMPTY);
-    }
-
-    public void register(Class<?>... itemsClasses) {
-        for (Class<?> itemClass : itemsClasses) {
-            BoboDefinition boboDefinition = definitionScanner.buildDefinition(itemClass);
-            registry.put(boboDefinition, EMPTY);
+    private void registerBobo(BoboDefinition boboDefinition) {
+        if (boboDefinition.getBoboClass().isAnnotationPresent(Item.class)) {
+            registry.put(boboDefinition, factory.createBobo(boboDefinition));
         }
     }
 
@@ -86,18 +84,4 @@ public class BoboRegistry {
         }
         return false;
     }
-
-    private <T> T getOrCreateBean(BoboDefinition definition, Class<T> type) {
-        Object singletonBobo = registry.get(definition);
-        if (singletonBobo != EMPTY) {
-            return type.cast(singletonBobo);
-        }
-
-        T newBobo = factory.createBobo(definition);
-        if (definition.getBoboClass().isAnnotationPresent(Item.class)) {
-            registry.put(definition, newBobo);
-        }
-        return newBobo;
-    }
-
 }

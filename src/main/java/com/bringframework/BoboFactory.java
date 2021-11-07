@@ -9,6 +9,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_ERROR;
+
 public class BoboFactory {
 
     private final List<BoboConfigurator> configurators;
@@ -24,23 +26,20 @@ public class BoboFactory {
         try {
             T newBobo = instantiate(definition);
 
-            configure(newBobo);
-
             invokeInit(definition, newBobo);
 
             return newBobo;
-
         } catch (Exception e) {
-            throw new BoboException("Cannot instantiate bobo: " + definition.getBoboName(), e);
+            throw new BoboException(String.format(BOBO_INSTANTIATION_ERROR, definition.getBoboName()), e);
         }
+    }
+
+    public <T> void configure(T bobo) {
+        configurators.forEach(boboConfigurator -> boboConfigurator.configure(bobo, registry));
     }
 
     private <T> T instantiate(BoboDefinition definition) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return (T) definition.getBoboClass().getDeclaredConstructor().newInstance();
-    }
-
-    private <T> void configure(T bobo) {
-        configurators.forEach(boboConfigurator -> boboConfigurator.configure(bobo, registry));
     }
 
     private <T> void invokeInit(BoboDefinition definition, T bobo) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -49,5 +48,4 @@ public class BoboFactory {
             initMethod.invoke(bobo);
         }
     }
-
 }
