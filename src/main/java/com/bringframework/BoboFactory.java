@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_ERROR;
+
 public class BoboFactory {
     @Getter()
     private final List<BoboConfigurator> boboConfigurators;
@@ -42,9 +44,8 @@ public class BoboFactory {
             invokeInit(definition, newBobo);
 
             return newBobo;
-
         } catch (Exception e) {
-            throw new BoboException("Cannot create bobo: " + definition.getBoboName(), e);
+            throw new BoboException(String.format(BOBO_INSTANTIATION_ERROR, definition.getBoboName()), e);
         }
     }
 
@@ -67,5 +68,4 @@ public class BoboFactory {
             initMethod.invoke(bobo);
         }
     }
-
 }

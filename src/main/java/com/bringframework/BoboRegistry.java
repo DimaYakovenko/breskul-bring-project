@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.bringframework.exception.ExceptionErrorMessage.AMBIGUOUS_BOBO_ERROR;
+import static com.bringframework.exception.ExceptionErrorMessage.NO_SUCH_BOBO_DEFINIITON_ERROR;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -38,13 +40,12 @@ public class BoboRegistry {
     public <T> T getBobo(Class<T> type) {
         List<BoboDefinition> candidates = findCandidates(type);
         if (candidates.size() == 0) {
-            throw new NoSuchBoboDefinitionException("No such bobo definition for type '" + type.getSimpleName() + "'");
+            throw new NoSuchBoboDefinitionException(
+                    String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, type.getSimpleName()));
         }
         if (candidates.size() > 1) {
             throw new AmbiguousBoboDefinitionException(String.format(
-                    "No qualifying bobo of type '%s' available: expected single matching bobo but found %d: %s",
-                    type.getCanonicalName(),
-                    candidates.size(),
+                    AMBIGUOUS_BOBO_ERROR, type.getCanonicalName(), candidates.size(),
                     candidates.stream().map(BoboDefinition::getBoboName).collect(joining(", ")))
             );
         }
@@ -61,7 +62,7 @@ public class BoboRegistry {
         BoboDefinition definitionByName = registry.keySet().stream()
                 .filter(definition -> definition.getBoboName().equals(boboName))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchBoboDefinitionException("No such bobo definition: '" + boboName + "'"));
+                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, boboName)));
 
         return getOrCreateBobo(definitionByName);
     }
