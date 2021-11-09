@@ -3,7 +3,7 @@ package com.bringframework.configurator;
 import com.bringframework.BoboFactory;
 import com.bringframework.annotation.BoboValue;
 import com.bringframework.exception.BoboException;
-import com.bringframework.util.TypeParserUtil;
+import com.bringframework.util.TypeResolverUtil;
 import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
@@ -35,7 +35,7 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
                 Object value = annotation.value().isEmpty()
                         ? propertiesMap.get(field.getName())
                         : propertiesMap.get(annotation.value());
-                value = TypeParserUtil.parseToType(value, field.getType());
+                value = TypeResolverUtil.parseToType(value, field.getType());
                 try {
                     field.setAccessible(true);
                     field.set(bobo, value);
