@@ -4,7 +4,7 @@ import com.bringframework.annotation.BoboValue;
 import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.configurator.BoboConfiguratorScanner;
 import com.bringframework.configurator.InjectAnnotationBoboConfigurator;
-import com.bringframework.configurator.PropertyValueAnnotationBoboConfigurator;
+import com.bringframework.configurator.BoboValueAnnotationConfiguration;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
@@ -69,7 +69,7 @@ public class BoboFactoryTest {
     public void getBoboByType_whenBoboDefinitionMoreThenOneFound_throwAmbiguousBoboDefinitionException() {
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
         definitions.add(BoboDefinition.builder().boboName("dao").boboClass(MyDaoImpl.class).build());
-        BoboFactory boboFactory = new BoboFactory(definitions, List.of(new InjectAnnotationBoboConfigurator(), new PropertyValueAnnotationBoboConfigurator()));
+        BoboFactory boboFactory = new BoboFactory(definitions, List.of(new InjectAnnotationBoboConfigurator(), new BoboValueAnnotationConfiguration()));
 
         AmbiguousBoboDefinitionException actualException = assertThrows(AmbiguousBoboDefinitionException.class, () -> {
             boboFactory.getBobo(MyDaoImpl.class);
@@ -87,7 +87,7 @@ public class BoboFactoryTest {
     public void getBoboByType_whenBoboDefinitionMoreThanOneFound_throwBoboExceptionWithNestedAmbiguousBoboDefinitionException() {
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
         definitions.add(BoboDefinition.builder().boboName("myDaoImpl1").boboClass(MyDaoImpl.class).build());
-        List<BoboConfigurator> configurators = List.of(new InjectAnnotationBoboConfigurator(), new PropertyValueAnnotationBoboConfigurator());
+        List<BoboConfigurator> configurators = List.of(new InjectAnnotationBoboConfigurator(), new BoboValueAnnotationConfiguration());
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
         BoboException actualException = assertThrows(BoboException.class, () -> {
