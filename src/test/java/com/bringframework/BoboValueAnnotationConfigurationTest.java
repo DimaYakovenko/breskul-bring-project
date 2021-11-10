@@ -10,7 +10,13 @@ import demonstration.project.service.impl.MyServiceImpl;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,12 +27,14 @@ class BoboValueAnnotationConfigurationTest {
 
     private final String TEST_RESOURCES_DIRECTORY_PATH = "src/main/resources";
     private final String TEST_PROPERTIES_FILE_PATH = "src/main/resources/application.properties";
+    private final List<String> TEST_PROPERTY_DATA = Arrays.asList("some.string.value=value", "some.int.value=5", "defaultValue=DefaultValue");
     private final String TEST_DEMONSTRATION_PACKAGE_PATH = "demonstration.project";
 
     @Test
     public void findAllFieldsWithAnnotationBoboValue() {
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
+        createTestResources();
 
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
@@ -37,11 +45,13 @@ class BoboValueAnnotationConfigurationTest {
                 .collect(Collectors.toList());
 
         assertEquals(3, fields.size());
+        deleteTestResources();
     }
 
     @SneakyThrows
     @Test
     public void checkStringFieldValueWithAnnotationBoboValue() {
+        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
 
@@ -53,11 +63,13 @@ class BoboValueAnnotationConfigurationTest {
         stringField.setAccessible(true);
         assertEquals("value", stringField.get(myService));
         assertEquals(String.class, stringField.get(myService).getClass());
+        deleteTestResources();
     }
 
     @SneakyThrows
     @Test
     public void checkPrimitiveFieldValueWithAnnotationBoboValue() {
+        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
 
@@ -68,11 +80,13 @@ class BoboValueAnnotationConfigurationTest {
         Field intField = myService.getClass().getDeclaredField("intValue");
         intField.setAccessible(true);
         assertEquals(5, intField.get(myService));
+        deleteTestResources();
     }
 
     @SneakyThrows
     @Test
     public void checkFieldValueWithAnnotationBoboValueWithoutParam() {
+        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
 
@@ -83,6 +97,26 @@ class BoboValueAnnotationConfigurationTest {
         Field defaultField = myService.getClass().getDeclaredField("defaultValue");
         defaultField.setAccessible(true);
         assertEquals("DefaultValue", defaultField.get(myService));
+        deleteTestResources();
+    }
+
+    private void createTestResources() {
+        try {
+            Files.createDirectories(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
+            Path file = Paths.get(TEST_PROPERTIES_FILE_PATH);
+            Files.write(file, TEST_PROPERTY_DATA, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteTestResources() {
+        try {
+            Files.delete(Paths.get(TEST_PROPERTIES_FILE_PATH));
+            Files.delete(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
