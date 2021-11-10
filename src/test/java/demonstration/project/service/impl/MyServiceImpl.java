@@ -5,8 +5,10 @@ import com.bringframework.annotation.Item;
 import com.bringframework.annotation.Inject;
 import demonstration.project.dao.MyDao;
 import demonstration.project.service.MyService;
+import lombok.Getter;
 
 @Item
+@Getter
 public class MyServiceImpl implements MyService {
 
     @Inject

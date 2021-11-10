@@ -7,7 +7,6 @@ import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import demonstration.project.service.MyService;
 import demonstration.project.service.impl.MyServiceImpl;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -32,9 +31,9 @@ class BoboValueAnnotationConfigurationTest {
 
     @Test
     public void findAllFieldsWithAnnotationBoboValue() {
+        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
-        createTestResources();
 
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
@@ -48,7 +47,6 @@ class BoboValueAnnotationConfigurationTest {
         deleteTestResources();
     }
 
-    @SneakyThrows
     @Test
     public void checkStringFieldValueWithAnnotationBoboValue() {
         createTestResources();
@@ -59,14 +57,11 @@ class BoboValueAnnotationConfigurationTest {
 
         MyServiceImpl myService = (MyServiceImpl) boboFactory.getBobo(MyService.class);
 
-        Field stringField = myService.getClass().getDeclaredField("stringValue");
-        stringField.setAccessible(true);
-        assertEquals("value", stringField.get(myService));
-        assertEquals(String.class, stringField.get(myService).getClass());
+        assertEquals("value", myService.getStringValue());
+        assertEquals(String.class, myService.getStringValue().getClass());
         deleteTestResources();
     }
 
-    @SneakyThrows
     @Test
     public void checkPrimitiveFieldValueWithAnnotationBoboValue() {
         createTestResources();
@@ -77,13 +72,10 @@ class BoboValueAnnotationConfigurationTest {
 
         MyServiceImpl myService = (MyServiceImpl) boboFactory.getBobo(MyService.class);
 
-        Field intField = myService.getClass().getDeclaredField("intValue");
-        intField.setAccessible(true);
-        assertEquals(5, intField.get(myService));
+        assertEquals(5, myService.getIntValue());
         deleteTestResources();
     }
 
-    @SneakyThrows
     @Test
     public void checkFieldValueWithAnnotationBoboValueWithoutParam() {
         createTestResources();
@@ -93,10 +85,7 @@ class BoboValueAnnotationConfigurationTest {
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
         MyServiceImpl myService = (MyServiceImpl) boboFactory.getBobo(MyService.class);
-
-        Field defaultField = myService.getClass().getDeclaredField("defaultValue");
-        defaultField.setAccessible(true);
-        assertEquals("DefaultValue", defaultField.get(myService));
+        assertEquals("DefaultValue", myService.getDefaultValue());
         deleteTestResources();
     }
 
@@ -106,6 +95,7 @@ class BoboValueAnnotationConfigurationTest {
             Path file = Paths.get(TEST_PROPERTIES_FILE_PATH);
             Files.write(file, TEST_PROPERTY_DATA, StandardCharsets.UTF_8);
         } catch (IOException e) {
+            System.out.println("Can't create properties file");
             e.printStackTrace();
         }
     }
@@ -115,6 +105,7 @@ class BoboValueAnnotationConfigurationTest {
             Files.delete(Paths.get(TEST_PROPERTIES_FILE_PATH));
             Files.delete(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
         } catch (IOException e) {
+            System.out.println("Can't delete properties file");
             e.printStackTrace();
         }
     }
