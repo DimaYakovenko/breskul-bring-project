@@ -4,9 +4,9 @@ import com.bringframework.BoboFactory;
 import com.bringframework.annotation.BoboValue;
 import com.bringframework.exception.BoboException;
 import com.bringframework.util.TypeResolverUtil;
-import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -18,14 +18,13 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
 
     private final Map<String, String> propertiesMap;
 
-    @SneakyThrows
+    private final String LINE_SPLIT_REGEX = "=";
+
     public BoboValueAnnotationConfiguration() {
-        String path = ClassLoader.getSystemClassLoader().getResource("application.properties").getPath();
-        Stream<String> lines = new BufferedReader(new FileReader(path)).lines();
-        propertiesMap = lines.map(line -> line.trim().split("=")).collect(toMap(arr -> arr[0].trim(), arr -> arr[1].trim()));
-
+        propertiesMap = findAvailableProperties()
+                .map(line -> line.split(LINE_SPLIT_REGEX))
+                .collect(toMap(arr -> arr[0].trim(), arr -> arr[1].trim()));
     }
-
 
     @Override
     public void configure(Object bobo, BoboFactory registry) {
@@ -44,6 +43,22 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
                             value, field.getName(), bobo.getClass().getName()), e);
                 }
             }
+        }
+    }
+
+    private Stream<String> findAvailableProperties() {
+        String path = ClassLoader.getSystemClassLoader().getResource("application.properties").getPath();
+        if (path != null) {
+            return readPropertiesByPath(path);
+        }
+        return Stream.empty();
+    }
+
+    private Stream<String> readPropertiesByPath(String path) {
+        try {
+            return new BufferedReader(new FileReader(path)).lines();
+        } catch (FileNotFoundException e) {
+            throw new BoboException("Can't find properties file in resources with name application.properties", e);
         }
     }
 }
