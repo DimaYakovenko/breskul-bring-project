@@ -23,7 +23,7 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
     public BoboValueAnnotationConfiguration() {
         propertiesMap = findAvailableProperties()
                 .map(line -> line.split(LINE_SPLIT_REGEX))
-                .collect(toMap(arr -> arr[0].trim(), arr -> arr[1].trim()));
+                .collect(toMap(key -> key[0].trim(), value -> value[1].trim()));
     }
 
     @Override
