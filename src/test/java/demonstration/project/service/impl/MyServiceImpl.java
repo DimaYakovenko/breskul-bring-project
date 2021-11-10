@@ -23,7 +23,6 @@ public class MyServiceImpl implements MyService {
 
     @Override
     public String showMe() {
-//        System.out.println("Value: " + value);
         return myDao.showMe();
     }
 }
