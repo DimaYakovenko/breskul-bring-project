@@ -7,6 +7,8 @@ import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import demonstration.project.service.MyService;
 import demonstration.project.service.impl.MyServiceImpl;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -24,14 +26,36 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BoboValueAnnotationConfigurationTest {
 
-    private final String TEST_RESOURCES_DIRECTORY_PATH = "src/main/resources";
-    private final String TEST_PROPERTIES_FILE_PATH = "src/main/resources/application.properties";
-    private final List<String> TEST_PROPERTY_DATA = Arrays.asList("some.string.value=value", "some.int.value=5", "defaultValue=DefaultValue");
+    private static final String TEST_RESOURCES_DIRECTORY_PATH = "src/main/resources";
+    private static final String TEST_PROPERTIES_FILE_PATH = "src/main/resources/application.properties";
+    private static final List<String> TEST_PROPERTY_DATA = Arrays.asList("some.string.value=value", "some.int.value=5", "defaultValue=DefaultValue");
     private final String TEST_DEMONSTRATION_PACKAGE_PATH = "demonstration.project";
+
+    @BeforeAll
+    private static void createTestResources() {
+        try {
+            Files.createDirectories(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
+            Path file = Paths.get(TEST_PROPERTIES_FILE_PATH);
+            Files.write(file, TEST_PROPERTY_DATA, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            System.out.println("Can't create properties file");
+            e.printStackTrace();
+        }
+    }
+
+    @AfterAll
+    private static void deleteTestResources() {
+        try {
+            Files.delete(Paths.get(TEST_PROPERTIES_FILE_PATH));
+            Files.delete(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
+        } catch (IOException e) {
+            System.out.println("Can't delete properties file");
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void findAllFieldsWithAnnotationBoboValue() {
-        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
 
@@ -44,12 +68,10 @@ class BoboValueAnnotationConfigurationTest {
                 .collect(Collectors.toList());
 
         assertEquals(3, fields.size());
-        deleteTestResources();
     }
 
     @Test
     public void checkStringFieldValueWithAnnotationBoboValue() {
-        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
 
@@ -59,12 +81,10 @@ class BoboValueAnnotationConfigurationTest {
 
         assertEquals("value", myService.getStringValue());
         assertEquals(String.class, myService.getStringValue().getClass());
-        deleteTestResources();
     }
 
     @Test
     public void checkPrimitiveFieldValueWithAnnotationBoboValue() {
-        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
 
@@ -73,12 +93,10 @@ class BoboValueAnnotationConfigurationTest {
         MyServiceImpl myService = (MyServiceImpl) boboFactory.getBobo(MyService.class);
 
         assertEquals(5, myService.getIntValue());
-        deleteTestResources();
     }
 
     @Test
     public void checkFieldValueWithAnnotationBoboValueWithoutParam() {
-        createTestResources();
         List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
         List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
 
@@ -86,30 +104,7 @@ class BoboValueAnnotationConfigurationTest {
 
         MyServiceImpl myService = (MyServiceImpl) boboFactory.getBobo(MyService.class);
         assertEquals("DefaultValue", myService.getDefaultValue());
-        deleteTestResources();
     }
-
-    private void createTestResources() {
-        try {
-            Files.createDirectories(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
-            Path file = Paths.get(TEST_PROPERTIES_FILE_PATH);
-            Files.write(file, TEST_PROPERTY_DATA, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            System.out.println("Can't create properties file");
-            e.printStackTrace();
-        }
-    }
-
-    private void deleteTestResources() {
-        try {
-            Files.delete(Paths.get(TEST_PROPERTIES_FILE_PATH));
-            Files.delete(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
-        } catch (IOException e) {
-            System.out.println("Can't delete properties file");
-            e.printStackTrace();
-        }
-    }
-
 
     //Here I try to create getters for a class by reflection. Maybe I will delete it soon.
     private Class<?> addGettersToClass(Class<?> clazz) {

@@ -10,8 +10,16 @@ import com.bringframework.exception.BoboException;
 import com.bringframework.exception.NoSuchBoboDefinitionException;
 import demonstration.project.dao.impl.MyDaoImpl;
 import demonstration.project.service.MyService;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
@@ -19,6 +27,33 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BoboFactoryTest {
+
+    private static final String TEST_RESOURCES_DIRECTORY_PATH = "src/main/resources";
+    private static final String TEST_PROPERTIES_FILE_PATH = "src/main/resources/application.properties";
+    private static final List<String> TEST_PROPERTY_DATA = Arrays.asList("some.string.value=value", "some.int.value=5", "defaultValue=DefaultValue");
+
+    @BeforeAll
+    private static void createTestResources() {
+        try {
+            Files.createDirectories(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
+            Path file = Paths.get(TEST_PROPERTIES_FILE_PATH);
+            Files.write(file, TEST_PROPERTY_DATA, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            System.out.println("Can't create properties file");
+            e.printStackTrace();
+        }
+    }
+
+    @AfterAll
+    private static void deleteTestResources() {
+        try {
+            Files.delete(Paths.get(TEST_PROPERTIES_FILE_PATH));
+            Files.delete(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
+        } catch (IOException e) {
+            System.out.println("Can't delete properties file");
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void getBoboByType_whenGetBoboByType_returnValidBobo() {
