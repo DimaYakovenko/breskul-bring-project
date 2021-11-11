@@ -9,7 +9,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
@@ -18,11 +20,12 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
 
     private final Map<String, String> propertiesMap;
 
-    private final String LINE_SPLIT_REGEX = "=";
+    private final String KEY_VALUE_DELIMITER = "=";
 
     public BoboValueAnnotationConfiguration() {
         propertiesMap = findAvailableProperties()
-                .map(line -> line.split(LINE_SPLIT_REGEX))
+                .stream()
+                .map(line -> line.split(KEY_VALUE_DELIMITER))
                 .collect(toMap(key -> key[0].trim(), value -> value[1].trim()));
     }
 
@@ -46,12 +49,12 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
         }
     }
 
-    private Stream<String> findAvailableProperties() {
+    private List<String> findAvailableProperties() {
         String path = ClassLoader.getSystemClassLoader().getResource("application.properties").getPath();
         if (path != null) {
-            return readPropertiesByPath(path);
+            return readPropertiesByPath(path).collect(Collectors.toList());
         }
-        return Stream.empty();
+        return List.of();
     }
 
     private Stream<String> readPropertiesByPath(String path) {
