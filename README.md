@@ -7,6 +7,7 @@ Brings the objects your application needs
 
 ## Features
 * Inject classes with dependencies by `@Inject` annotation
+* Get some values from properties file by `@BoboValue` annotation (Spring `@Value` analog)
 * Register instances by marking them `@Item` annotation (Spring `@Component` analog)
 * Register instances inside `@Configuration` class by `@Bobo` annotation on method  (Spring `@Bean` analog)
 
@@ -33,4 +34,18 @@ List<BoboConfigurator> configurators = new BoboConfiguratorScanner("package_to_s
 
 BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 MyService bobo = boboFactory.getBobo(MyService.class);
+```
+`@BoboValue` annotation allows you to get values from a properties file. 
+This requires that a properties file (with name is `applcation.properties`)  be created in the user app in the resource directory. 
+To get the value of properties user needs to mark the field with this annotation 
+and in its parameter specify the name of the property. 
+Example:
+```java
+@Item
+public class MyService {
+    
+    @BoboValue("some.string.value")
+    private String stringValue;
+    ...    
+}
 ```
