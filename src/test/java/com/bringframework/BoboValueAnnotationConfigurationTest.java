@@ -7,17 +7,9 @@ import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import demonstration.project.service.MyService;
 import demonstration.project.service.impl.MyServiceImpl;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,33 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BoboValueAnnotationConfigurationTest {
 
-    private static final String TEST_RESOURCES_DIRECTORY_PATH = "src/main/resources";
-    private static final String TEST_PROPERTIES_FILE_PATH = "src/main/resources/application.properties";
-    private static final List<String> TEST_PROPERTY_DATA = Arrays.asList("some.string.value=value", "some.int.value=5", "defaultValue=DefaultValue");
     private final String TEST_DEMONSTRATION_PACKAGE_PATH = "demonstration.project";
-
-    @BeforeAll
-    private static void createTestResources() {
-        try {
-            Files.createDirectories(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
-            Path file = Paths.get(TEST_PROPERTIES_FILE_PATH);
-            Files.write(file, TEST_PROPERTY_DATA, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            System.out.println("Can't create properties file");
-            e.printStackTrace();
-        }
-    }
-
-    @AfterAll
-    private static void deleteTestResources() {
-        try {
-            Files.delete(Paths.get(TEST_PROPERTIES_FILE_PATH));
-            Files.delete(Paths.get(TEST_RESOURCES_DIRECTORY_PATH));
-        } catch (IOException e) {
-            System.out.println("Can't delete properties file");
-            e.printStackTrace();
-        }
-    }
 
     @Test
     public void findAllFieldsWithAnnotationBoboValue() {
@@ -104,34 +70,5 @@ class BoboValueAnnotationConfigurationTest {
 
         MyServiceImpl myService = (MyServiceImpl) boboFactory.getBobo(MyService.class);
         assertEquals("DefaultValue", myService.getDefaultValue());
-    }
-
-    //Here I try to create getters for a class by reflection. Maybe I will delete it soon.
-    private Class<?> addGettersToClass(Class<?> clazz) {
-        Field[] fields = clazz.getDeclaredFields();
-        StringBuilder builder = new StringBuilder();
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            String fieldType = field.getType().getSimpleName();
-            createGetter(fieldName, fieldType, builder);
-            System.out.println(builder.toString());
-        }
-        return clazz;
-    }
-
-    private void createGetter(String fieldName, String fieldType, StringBuilder getter) {
-        getter.append("public ")
-                .append(fieldType)
-                .append(fieldType.equals("boolean") ? " is" : " get")
-                .append(getFieldName(fieldName))
-                .append("(){")
-                .append("\n\treturn ")
-                .append(fieldName)
-                .append(";")
-                .append("\n" + "}" + "\n");
-    }
-
-    private String getFieldName(String fieldName) {
-        return fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
     }
 }
