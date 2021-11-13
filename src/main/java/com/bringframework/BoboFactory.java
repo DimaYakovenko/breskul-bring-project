@@ -4,7 +4,6 @@ import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.configurator.BoboConfiguratorScanner;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.exception.BoboException;
-import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
