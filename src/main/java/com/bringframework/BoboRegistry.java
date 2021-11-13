@@ -5,13 +5,13 @@ import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
 import com.bringframework.exception.NoSuchBoboDefinitionException;
+import com.bringframework.util.BoboDefinitionUtil;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.bringframework.exception.ExceptionErrorMessage.AMBIGUOUS_BOBO_ERROR;
-import static com.bringframework.exception.ExceptionErrorMessage.NO_SUCH_BOBO_DEFINIITON_ERROR;
+import static com.bringframework.exception.ExceptionErrorMessage.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -63,15 +63,19 @@ public class BoboRegistry {
         BoboDefinition definitionByName = registry.keySet().stream()
                 .filter(definition -> definition.getBoboName().equals(boboName))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, boboName)));
+                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION, boboName)));
 
         return getOrCreateBobo(definitionByName);
     }
 
     public void register(Class<?>... itemsClasses) {
         for (Class<?> itemClass : itemsClasses) {
-            registerBoboDefinition(ItemAnnotationBoboDefinitionScanner.buildDefinition(itemClass));
+            registerBoboDefinition(BoboDefinitionUtil.buildDefinition(itemClass));
         }
+    }
+
+    public void register(Class<?> itemClass, Object instance, String name) {
+        registry.put(BoboDefinitionUtil.buildDefinition(itemClass, name), instance);
     }
 
     public void scan(String... basePackages) {

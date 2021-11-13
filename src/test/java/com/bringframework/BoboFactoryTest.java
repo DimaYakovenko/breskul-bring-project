@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 
-import static com.bringframework.configurator.BoboConfiguratorScanner.DEFAULT_PACKAGE;
 import static java.beans.Introspector.decapitalize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -31,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BoboFactoryTest {
+    private static final String DEFAULT_PACKAGE = "com.bringframework.configurator";
     private static final String PACKAGE_TO_SCAN = "items";
     private BoboRegistry mockRegistry;
 

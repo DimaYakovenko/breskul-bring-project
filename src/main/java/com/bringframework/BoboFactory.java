@@ -4,7 +4,6 @@ import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.configurator.BoboConfiguratorScanner;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.exception.BoboException;
-import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,10 +11,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static com.bringframework.configurator.BoboConfiguratorScanner.DEFAULT_PACKAGE;
 import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_ERROR;
 
 public class BoboFactory {
+    private static final String DEFAULT_PACKAGE = "com.bringframework.configurator";
     private final List<BoboConfigurator> boboConfigurators;
     private final BoboRegistry registry;
 
