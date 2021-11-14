@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BoboValueAnnotationConfigurationTest {
 
-    private final String TEST_DEMONSTRATION_PACKAGE_PATH = "demonstration.project";
+    private final String TEST_PACKAGE_PATH = "demonstration.project";
 
     @Test
     public void findAllFieldsWithAnnotationBoboValue() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
-        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
+        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_PACKAGE_PATH).scan();
+        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_PACKAGE_PATH).scan();
 
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
@@ -38,8 +38,8 @@ class BoboValueAnnotationConfigurationTest {
 
     @Test
     public void checkStringFieldValueWithAnnotationBoboValue() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
-        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
+        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_PACKAGE_PATH).scan();
+        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_PACKAGE_PATH).scan();
 
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
@@ -51,8 +51,8 @@ class BoboValueAnnotationConfigurationTest {
 
     @Test
     public void checkPrimitiveFieldValueWithAnnotationBoboValue() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
-        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
+        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_PACKAGE_PATH).scan();
+        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_PACKAGE_PATH).scan();
 
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
@@ -63,8 +63,8 @@ class BoboValueAnnotationConfigurationTest {
 
     @Test
     public void checkFieldValueWithAnnotationBoboValueWithoutParam() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
-        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_DEMONSTRATION_PACKAGE_PATH).scan();
+        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner(TEST_PACKAGE_PATH).scan();
+        List<BoboConfigurator> configurators = new BoboConfiguratorScanner(TEST_PACKAGE_PATH).scan();
 
         BoboFactory boboFactory = new BoboFactory(definitions, configurators);
 
