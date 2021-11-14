@@ -9,9 +9,8 @@ import java.math.BigInteger;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TypeResolverUtil {
 
-    public static Object parseToType(Object value, Class<?> clazz) {
-        if (!(value instanceof String)) return value;
-        String propertyValue = (String) value;
+    public static Object parseToType(String propertyValue, Class<?> clazz) {
+
         if (clazz == int.class || clazz == Integer.class) {
             return Integer.parseInt(propertyValue);
         } else if (clazz == long.class || clazz == Long.class) {
@@ -29,6 +28,6 @@ public final class TypeResolverUtil {
         } else if (clazz == BigDecimal.class) {
             return new BigDecimal(propertyValue);
         }
-        return value;
+        return propertyValue;
     }
 }

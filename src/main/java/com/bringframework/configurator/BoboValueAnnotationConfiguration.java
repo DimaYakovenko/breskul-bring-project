@@ -39,13 +39,13 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
         for (Field field : bobo.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(BoboValue.class)) {
                 var annotation = field.getAnnotation(BoboValue.class);
-                Object value = annotation.value().isEmpty()
+                String value = annotation.value().isEmpty()
                         ? propertiesMap.get(field.getName())
                         : propertiesMap.get(annotation.value());
-                value = TypeResolverUtil.parseToType(value, field.getType());
+
                 try {
                     field.setAccessible(true);
-                    field.set(bobo, value);
+                    field.set(bobo, TypeResolverUtil.parseToType(value, field.getType()));
                 } catch (IllegalAccessException e) {
                     throw new BoboException(String.format("Can't set value: %s from properties to field: %s in class: %s",
                             value, field.getName(), bobo.getClass().getName()), e);
