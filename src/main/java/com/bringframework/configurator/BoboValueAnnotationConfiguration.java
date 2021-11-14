@@ -8,12 +8,15 @@ import com.bringframework.util.TypeResolverUtil;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class BoboValueAnnotationConfiguration implements BoboConfigurator {
@@ -21,6 +24,8 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
     private final Map<String, String> propertiesMap;
 
     private final String KEY_VALUE_DELIMITER = "=";
+
+    private final String DEFAULT_PROPERTIES_FILE_NAME = "application.properties";
 
     public BoboValueAnnotationConfiguration() {
         propertiesMap = findAvailableProperties()
@@ -50,18 +55,19 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
     }
 
     private List<String> findAvailableProperties() {
-        String path = ClassLoader.getSystemClassLoader().getResource("application.properties").getPath();
-        if (path != null) {
-            return readPropertiesByPath(path).collect(Collectors.toList());
-        }
-        return List.of();
+        return Optional.ofNullable(ClassLoader.getSystemClassLoader().getResource(DEFAULT_PROPERTIES_FILE_NAME))
+                .map(URL::getPath)
+                .map(this::readPropertiesByPath)
+                .orElse(Collections.emptyList());
     }
 
-    private Stream<String> readPropertiesByPath(String path) {
-        try {
-            return new BufferedReader(new FileReader(path)).lines();
+    private List<String> readPropertiesByPath(String path) {
+        try(BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            return reader.lines().collect(toList());
         } catch (FileNotFoundException e) {
             throw new BoboException("Can't find properties file in resources with name application.properties", e);
+        } catch (IOException e) {
+            throw new BoboException("Can't read properties file", e);
         }
     }
 }
