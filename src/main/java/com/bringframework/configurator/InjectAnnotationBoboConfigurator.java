@@ -1,21 +1,24 @@
 package com.bringframework.configurator;
 
-import com.bringframework.BoboFactory;
+import com.bringframework.BoboRegistry;
 import com.bringframework.annotation.Inject;
-import lombok.SneakyThrows;
+import com.bringframework.exception.BoboException;
 
 import java.lang.reflect.Field;
 
 public class InjectAnnotationBoboConfigurator implements BoboConfigurator {
     @Override
-    @SneakyThrows
-    public void configure(Object bobo, BoboFactory registry) {
-        for (Field field : bobo.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Inject.class)) {
-                field.setAccessible(true);
-                Object object = registry.getBobo(field.getType());
-                field.set(bobo, object);
+    public void configure(Object bobo, BoboRegistry registry) {
+        try {
+            for (Field field : bobo.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(Inject.class)) {
+                    field.setAccessible(true);
+                    Object object = registry.getBobo(field.getType());
+                    field.set(bobo, object);
+                }
             }
+        } catch (Exception e) {
+            throw new BoboException("Error during configuring bobo object", e);
         }
     }
 }

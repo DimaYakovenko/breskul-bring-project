@@ -2,25 +2,23 @@ package com.bringframework.configurator;
 
 import com.bringframework.exception.BoboException;
 import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BoboConfiguratorScanner {
-    private final Reflections scanner;
+    public static final String DEFAULT_PACKAGE = "com.bringframework.configurator";
 
-    public BoboConfiguratorScanner(String packageToScan) {
-        scanner = new Reflections("com.bringframework", packageToScan);
-    }
-
-    public List<BoboConfigurator> scan() {
-        return scanner.getSubTypesOf(BoboConfigurator.class)
+    public static List<BoboConfigurator> scan(String... packageToScan) {
+        return new Reflections(packageToScan, Scanners.SubTypes)
+                .getSubTypesOf(BoboConfigurator.class)
                 .stream()
-                .map(this::createInstance)
+                .map(BoboConfiguratorScanner::createInstance)
                 .collect(Collectors.toList());
     }
 
-    private BoboConfigurator createInstance(Class<? extends BoboConfigurator> configuratorClass) {
+    private static BoboConfigurator createInstance(Class<? extends BoboConfigurator> configuratorClass) {
         try {
             return configuratorClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

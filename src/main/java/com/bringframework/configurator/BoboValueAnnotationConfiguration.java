@@ -1,6 +1,6 @@
 package com.bringframework.configurator;
 
-import com.bringframework.BoboFactory;
+import com.bringframework.BoboRegistry;
 import com.bringframework.annotation.BoboValue;
 import com.bringframework.exception.BoboException;
 import com.bringframework.util.TypeResolverUtil;
@@ -35,7 +35,7 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
     }
 
     @Override
-    public void configure(Object bobo, BoboFactory registry) {
+    public void configure(Object bobo, BoboRegistry registry) {
         for (Field field : bobo.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(BoboValue.class)) {
                 var annotation = field.getAnnotation(BoboValue.class);

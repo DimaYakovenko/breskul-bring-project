@@ -4,97 +4,106 @@ import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.configurator.BoboConfiguratorScanner;
 import com.bringframework.configurator.InjectAnnotationBoboConfigurator;
 import com.bringframework.definition.BoboDefinition;
-import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
-import com.bringframework.exception.AmbiguousBoboDefinitionException;
-import com.bringframework.exception.BoboException;
-import com.bringframework.exception.NoSuchBoboDefinitionException;
-import demonstration.project.dao.impl.MyDaoImpl;
-import demonstration.project.service.MyService;
+import items.dao.FakeUserRepository;
+import items.dao.impl.FakeUserRepositoryImpl;
+import items.service.impl.FakeUserServiceImpl;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
-import java.util.List;
+import java.lang.reflect.Field;
 
-import static java.util.Collections.emptyList;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.bringframework.configurator.BoboConfiguratorScanner.DEFAULT_PACKAGE;
+import static java.beans.Introspector.decapitalize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-public class BoboFactoryTest {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-    @Test
-    public void getBoboByType_whenGetBoboByType_returnValidBobo() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
-        List<BoboConfigurator> configurators = new BoboConfiguratorScanner("demonstration.project").scan();
+import static org.junit.jupiter.api.Assertions.*;
 
-        BoboFactory boboFactory = new BoboFactory(definitions, configurators);
+class BoboFactoryTest {
+    private static final String PACKAGE_TO_SCAN = "items";
+    private BoboRegistry mockRegistry;
 
-        MyService myService = boboFactory.getBobo(MyService.class);
-        assertNotNull(myService);
-        assertEquals("It is alive!!!! \uD83D\uDE02 \uD83D\uDE02 \uD83D\uDE02", myService.showMe());
+    @BeforeEach
+    void setUp() {
+        mockRegistry = mock(BoboRegistry.class);
     }
 
     @Test
-    public void getBoboByType_whenGetTwoSingletonBobo_shouldReturnTheSameInstance() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
-        List<BoboConfigurator> configurators = new BoboConfiguratorScanner("demonstration.project").scan();
+    @SneakyThrows
+    void shouldCreateBoboFromBoboDefinition() {
+        // Given
+        BoboFactory factory = new BoboFactory(mockRegistry, PACKAGE_TO_SCAN);
+        Class<FakeUserServiceImpl> boboType = FakeUserServiceImpl.class;
+        BoboDefinition boboDefinition = BoboDefinition.of(boboType, decapitalize(boboType.getSimpleName()));
 
-        BoboFactory boboFactory = new BoboFactory(definitions, configurators);
+        // When
+        Object bobo = factory.createBobo(boboDefinition);
 
-        MyService bobo = boboFactory.getBobo(MyService.class);
-        assertNotNull(bobo);
-        MyService bobo2 = boboFactory.getBobo(MyService.class);
-        assertNotNull(bobo2);
-        assertEquals(bobo, bobo2);
+        // Then
+        assertInstanceOf(FakeUserServiceImpl.class, bobo);
+        Field actualRepository = bobo.getClass().getDeclaredField("fakeUserRepository");
+        assertNotNull(actualRepository);
+        assertEquals(FakeUserRepository.class.getSimpleName(), actualRepository.getType().getSimpleName());
     }
 
     @Test
-    public void getBoboByType_whenBoboDefinitionNotFound_throwNoSuchBoboDefinitionException() {
-        BoboFactory boboFactory = new BoboFactory(emptyList(), emptyList());
-        Class<MyService> myBoboClass = MyService.class;
+    @SneakyThrows
+    void createBobo_whenCreateBoboWithInnerDependency_shouldCallBoboRegistryGetBoboForThatDependency() {
+        // Given
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenReturn(new FakeUserRepositoryImpl());
+        BoboFactory factory = new BoboFactory(mockRegistry, PACKAGE_TO_SCAN);
 
-        Exception exception = assertThrows(NoSuchBoboDefinitionException.class, () -> {
-            boboFactory.getBobo(myBoboClass);
-        });
-
-        assertEquals("No such bobo definition for type '" + myBoboClass.getSimpleName() + "'", exception.getMessage());
-    }
-
-    @Test
-    public void getBoboByType_whenBoboDefinitionMoreThenOneFound_throwAmbiguousBoboDefinitionException() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
-        definitions.add(BoboDefinition.builder().boboName("dao").boboClass(MyDaoImpl.class).build());
-        BoboFactory boboFactory = new BoboFactory(definitions, List.of(new InjectAnnotationBoboConfigurator()));
-
-        AmbiguousBoboDefinitionException actualException = assertThrows(AmbiguousBoboDefinitionException.class, () -> {
-            boboFactory.getBobo(MyDaoImpl.class);
-        });
-        assertEquals(
-                "No qualifying bobo of type 'demonstration.project.dao.impl.MyDaoImpl' available: expected single matching bobo but found 2:",
-                actualException.getMessage().substring(0, 123)
+        // When
+        FakeUserServiceImpl userServiceBobo = (FakeUserServiceImpl) factory.createBobo(
+                BoboDefinition.of(
+                        FakeUserServiceImpl.class,
+                        "myServiceImpl"
+                )
         );
-        String boboNameList = actualException.getMessage().substring(124);
-        assertTrue(boboNameList.contains("dao"));
-        assertTrue(boboNameList.contains("myDaoImpl"));
+
+        // Then
+        Field fakeUserRepository = userServiceBobo.getClass().getDeclaredField("fakeUserRepository");
+        fakeUserRepository.setAccessible(true);
+        assertEquals(FakeUserRepository.class.getSimpleName(), fakeUserRepository.getType().getSimpleName());
+        assertNotNull(fakeUserRepository.get(userServiceBobo));
+        verify(mockRegistry).getBobo(FakeUserRepository.class);
     }
 
     @Test
-    public void getBoboByType_whenBoboDefinitionMoreThanOneFound_throwBoboExceptionWithNestedAmbiguousBoboDefinitionException() {
-        List<BoboDefinition> definitions = new ItemAnnotationBoboDefinitionScanner("demonstration.project").scan();
-        definitions.add(BoboDefinition.builder().boboName("myDaoImpl1").boboClass(MyDaoImpl.class).build());
-        List<BoboConfigurator> configurators = List.of(new InjectAnnotationBoboConfigurator());
-        BoboFactory boboFactory = new BoboFactory(definitions, configurators);
+    void addBoboConfigurator_whenAddNewBoboConfigurator_itWasAddedToConfiguratorList() {
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenReturn(new FakeUserRepositoryImpl());
 
-        BoboException actualException = assertThrows(BoboException.class, () -> {
-            boboFactory.getBobo(MyService.class);
-        });
-
-        assertEquals("Cannot instantiate bobo: myServiceImpl", actualException.getMessage());
-        assertTrue(actualException.getCause() instanceof AmbiguousBoboDefinitionException);
-        assertEquals(
-                "No qualifying bobo of type 'demonstration.project.dao.MyDao' available: expected single matching bobo but found 2:",
-                actualException.getCause().getMessage().substring(0, 114)
-        );
-        String boboNameList = actualException.getCause().getMessage().substring(114);
-        assertTrue(boboNameList.contains("myDaoImpl"));
-        assertTrue(boboNameList.contains("myDaoImpl1"));
+        List<BoboConfigurator> configurators = new ArrayList<>();
+        MockedStatic<BoboConfiguratorScanner> scannerMock = Mockito.mockStatic(BoboConfiguratorScanner.class);
+        scannerMock.when(() -> BoboConfiguratorScanner.scan(DEFAULT_PACKAGE)).thenReturn(configurators);
+        BoboFactory factory = new BoboFactory(mockRegistry);
+        InjectAnnotationBoboConfigurator boboConfigurator = new InjectAnnotationBoboConfigurator();
+        factory.addBoboConfigurator(boboConfigurator);
+        assertEquals(1, configurators.size());
+        assertEquals(configurators.get(0), boboConfigurator);
     }
+
+    @Test
+    void addBoboConfigurator_whenAddNewBoboConfigurator_itShouldBeInvokedDuringObjectConfiguration() {
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenReturn(new FakeUserRepositoryImpl());
+
+        BoboFactory factory = new BoboFactory(mockRegistry);
+        AtomicBoolean wasInvoked = new AtomicBoolean();
+        factory.addBoboConfigurator((obj, reg) -> wasInvoked.set(true));
+        factory.createBobo(BoboDefinition.of(FakeUserRepositoryImpl.class, "fakeUserRepositoryImpl"));
+
+        assertTrue(wasInvoked.get());
+    }
+
 }
