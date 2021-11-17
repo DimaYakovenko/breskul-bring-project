@@ -108,13 +108,13 @@ class BoboFactoryTest {
     }
 
     @Test
-    void createBobo_whenBoboDefinitionNull_throwBoboException() {
+    void createBobo_whenBoboDefinitionNull_throwNullPointerException() {
         // Given
         when(mockRegistry.getBobo(FakeUserRepository.class)).thenReturn(new FakeUserRepositoryImpl());
 
         BoboFactory factory = new BoboFactory(mockRegistry);
         // When
-        BoboException actualException = assertThrows(BoboException.class, () -> factory.createBobo(null));
+        NullPointerException actualException = assertThrows(NullPointerException.class, () -> factory.createBobo(null));
         // Then
         assertEquals("BoboDefinition must not be null", actualException.getMessage());
     }
@@ -122,16 +122,16 @@ class BoboFactoryTest {
     @Test
     void createBobo_whenGetBoboException_shouldReThrowIt() {
         // Given
+        BoboException expectedException = new BoboException("Some bobo error");
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenThrow(expectedException);
         BoboFactory factory = new BoboFactory(mockRegistry);
-        factory.addBoboConfigurator((obj, reg) -> {throw new BoboException("Some bobo error");});
         // When
         BoboException actualException = assertThrows(BoboException.class, () -> factory.createBobo(BoboDefinition.of(
                 FakeUserServiceImpl.class,
                 "myServiceImpl"
         )));
         // Then
-        assertEquals("Some bobo error", actualException.getMessage());
-        assertNull(actualException.getCause());
+        assertEquals(expectedException, actualException);
     }
 
     @Test

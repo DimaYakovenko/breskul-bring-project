@@ -17,6 +17,8 @@ public class InjectAnnotationBoboConfigurator implements BoboConfigurator {
                     field.set(bobo, object);
                 }
             }
+        } catch (BoboException boboException) {
+            throw boboException;
         } catch (Exception e) {
             throw new BoboException("Error during configuring bobo object", e);
         }

@@ -35,7 +35,7 @@ public class BoboFactory {
     }
 
     public Object createBobo(BoboDefinition definition) {
-        validateDefinition(definition);
+        requireNonNull(definition, "BoboDefinition must not be null");
         try {
             Object newBobo = instantiate(definition);
 
@@ -71,9 +71,4 @@ public class BoboFactory {
         }
     }
 
-    private void validateDefinition(BoboDefinition definition) {
-        if (definition == null) {
-            throw new BoboException("BoboDefinition must not be null");
-        }
-    }
 }
