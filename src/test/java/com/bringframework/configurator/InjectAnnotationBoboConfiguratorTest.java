@@ -49,6 +49,21 @@ class InjectAnnotationBoboConfiguratorTest {
     }
 
     @Test
+    void configure_whenBoboExceptionWasThrown_reThrowIt() {
+        BoboException expectedException = new BoboException("Expected");
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenThrow(expectedException);
+
+        InjectAnnotationBoboConfigurator configurator = new InjectAnnotationBoboConfigurator();
+
+        BoboException actualException = assertThrows(
+                BoboException.class,
+                () -> configurator.configure(new FakeUserServiceImpl(), mockRegistry)
+        );
+
+        assertEquals(expectedException, actualException);
+    }
+
+    @Test
     void configure_whenFieldNotAnnotatedInject_shouldNotCallRegistry() {
         InjectAnnotationBoboConfigurator configurator = new InjectAnnotationBoboConfigurator();
         configurator.configure(new FakeUserRepositoryImpl(), mockRegistry);

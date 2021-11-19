@@ -9,10 +9,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static com.bringframework.configurator.BoboConfiguratorScanner.DEFAULT_PACKAGE;
 import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_ERROR;
+import static java.util.Objects.requireNonNull;
 
 public class BoboFactory {
     private final List<BoboConfigurator> boboConfigurators;
@@ -35,6 +35,7 @@ public class BoboFactory {
     }
 
     public Object createBobo(BoboDefinition definition) {
+        requireNonNull(definition, "BoboDefinition must not be null");
         try {
             Object newBobo = instantiate(definition);
 
@@ -43,13 +44,15 @@ public class BoboFactory {
             invokeInit(definition, newBobo);
 
             return newBobo;
+        } catch (BoboException boboException) {
+            throw boboException;
         } catch (Exception e) {
             throw new BoboException(String.format(BOBO_INSTANTIATION_ERROR, definition.getBoboName()), e);
         }
     }
 
     public void addBoboConfigurator(BoboConfigurator boboConfigurator) {
-        Objects.requireNonNull(boboConfigurator, "BoboConfigurator must not be null");
+        requireNonNull(boboConfigurator, "BoboConfigurator must not be null");
         boboConfigurators.add(boboConfigurator);
     }
 
@@ -67,4 +70,5 @@ public class BoboFactory {
             initMethod.invoke(bobo);
         }
     }
+
 }
