@@ -62,7 +62,7 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
     }
 
     private List<String> readPropertiesByPath(String path) {
-        try(BufferedReader reader = new BufferedReader(new FileReader(path))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             return reader.lines().collect(toList());
         } catch (FileNotFoundException e) {
             throw new BoboException("Can't find properties file in resources with name application.properties", e);
