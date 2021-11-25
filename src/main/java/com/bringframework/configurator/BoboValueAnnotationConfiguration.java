@@ -31,6 +31,7 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
         propertiesMap = findAvailableProperties()
                 .stream()
                 .map(line -> line.split(KEY_VALUE_DELIMITER))
+                .filter(arr -> arr.length > 1)
                 .collect(toMap(key -> key[0].trim(), value -> value[1].trim()));
     }
 

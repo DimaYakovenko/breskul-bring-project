@@ -21,7 +21,7 @@ class BoboValueAnnotationConfigurationTest {
 
     @Test
     @SneakyThrows
-    void whenApplicationPropertiesFileExists_andHasProperties() {
+    void whenApplicationPropertiesFileExistsAndHasProperties_thenFillPropertyMaps() {
         BoboConfigurator boboConfigurator = new BoboValueAnnotationConfiguration();
         Field configMapField = boboConfigurator.getClass().getDeclaredField("propertiesMap");
         configMapField.setAccessible(true);
@@ -51,6 +51,7 @@ class BoboValueAnnotationConfigurationTest {
         assertEquals("value", fakeUserService.getStringValue());
         assertEquals(5, fakeUserService.getIntValue());
         assertEquals("DefaultValue", fakeUserService.getDefaultValue());
+        assertNull(fakeUserService.getEmptyValue());
     }
 
     @Test
@@ -64,26 +65,4 @@ class BoboValueAnnotationConfigurationTest {
         assertEquals(BoboException.class, exception.getCause().getClass());
         assertEquals(NOT_FOUND_FILE_MSG, exception.getCause().getMessage());
     }
-
-    @Test
-    @SneakyThrows
-    void whenApplicationPropertiesFileExists_butEmpty() {
-        BoboConfigurator boboConfigurator = new BoboValueAnnotationConfiguration();
-        // Change private modifier to public
-        Field field = boboConfigurator.getClass().getDeclaredField("DEFAULT_PROPERTIES_FILE_NAME");
-        field.setAccessible(true);
-
-        // Remove final modifier
-        Field modifiers = Field.class.getDeclaredField("modifiers");
-        modifiers.setAccessible(true);
-        modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
-        // Get and set field value
-        String oldValue = (String) field.get(boboConfigurator);
-        System.out.println(oldValue);
-        field.set(boboConfigurator, "emptyApp.properties");
-        String newValue = (String) field.get(boboConfigurator);
-        System.out.println(newValue);
-    }
-
 }

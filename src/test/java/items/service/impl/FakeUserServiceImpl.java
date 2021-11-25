@@ -21,4 +21,7 @@ public class FakeUserServiceImpl implements FakeUserService {
 
     @BoboValue()
     private String defaultValue;
+
+    @BoboValue("empty.key")
+    private String emptyValue;
 }
