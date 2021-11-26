@@ -1,5 +1,6 @@
 package com.bringframework.util;
 
+import com.bringframework.exception.BoboException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -9,9 +10,11 @@ import java.math.BigInteger;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TypeResolverUtil {
 
-    public static Object parseToType(String propertyValue, Class<?> clazz) {
+    public static Object parseToType(String propertyValue, Class<?> clazz) throws NumberFormatException {
 
-        if (clazz == int.class || clazz == Integer.class) {
+        if (clazz == String.class) {
+            return propertyValue;
+        } else if (clazz == int.class || clazz == Integer.class) {
             return Integer.parseInt(propertyValue);
         } else if (clazz == long.class || clazz == Long.class) {
             return Long.parseLong(propertyValue);
@@ -28,6 +31,7 @@ public final class TypeResolverUtil {
         } else if (clazz == BigDecimal.class) {
             return new BigDecimal(propertyValue);
         }
-        return propertyValue;
+
+        throw new ClassCastException(String.format("Can't cast value \"%s\" to %s class", propertyValue, clazz.getSimpleName()));
     }
 }

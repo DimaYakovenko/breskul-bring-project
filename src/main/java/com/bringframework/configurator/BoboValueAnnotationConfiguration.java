@@ -47,8 +47,8 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
                 try {
                     field.setAccessible(true);
                     field.set(bobo, TypeResolverUtil.parseToType(value, field.getType()));
-                } catch (IllegalAccessException e) {
-                    throw new BoboException(String.format("Can't set value: %s from properties to field: %s in class: %s",
+                } catch (IllegalAccessException | NumberFormatException | ClassCastException e) {
+                    throw new BoboException(String.format("Can't set value \"%s\" from properties to field \"%s\" in class %s",
                             value, field.getName(), bobo.getClass().getName()), e);
                 }
             }
