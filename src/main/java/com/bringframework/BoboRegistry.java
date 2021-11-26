@@ -5,6 +5,7 @@ import com.bringframework.definition.BoboDefinition;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
 import com.bringframework.exception.NoSuchBoboDefinitionException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import static com.bringframework.exception.ExceptionErrorMessage.NO_SUCH_BOBO_DE
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 public class BoboRegistry {
 
     private final static Object EMPTY = new Object();
@@ -38,13 +40,16 @@ public class BoboRegistry {
 
     public <T> T getBobo(Class<T> type) {
         List<BoboDefinition> candidates = findCandidates(type);
-        if (candidates.size() == 0) {
+        int sizeOfCandidates = candidates.size();
+        if (sizeOfCandidates == 0) {
+            log.debug("There is no candidates for such BoboDefinition");
             throw new NoSuchBoboDefinitionException(
                     String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, type.getSimpleName()));
         }
-        if (candidates.size() > 1) {
+        if (sizeOfCandidates > 1) {
+            log.error("Expected single matching bobo, but was {}", sizeOfCandidates);
             throw new AmbiguousBoboDefinitionException(String.format(
-                    AMBIGUOUS_BOBO_ERROR, type.getCanonicalName(), candidates.size(),
+                    AMBIGUOUS_BOBO_ERROR, type.getCanonicalName(), sizeOfCandidates,
                     candidates.stream()
                             .map(BoboDefinition::getBoboName)
                             .collect(joining(", ")))
