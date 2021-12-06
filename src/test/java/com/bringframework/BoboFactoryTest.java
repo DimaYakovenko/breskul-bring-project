@@ -4,6 +4,7 @@ import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.configurator.BoboConfiguratorScanner;
 import com.bringframework.configurator.InjectAnnotationBoboConfigurator;
 import com.bringframework.definition.BoboDefinition;
+import com.bringframework.exception.BoboException;
 import items.dao.FakeUserRepository;
 import items.dao.impl.FakeUserRepositoryImpl;
 import items.service.impl.FakeUserServiceImpl;
@@ -104,6 +105,52 @@ class BoboFactoryTest {
         factory.createBobo(BoboDefinition.of(FakeUserRepositoryImpl.class, "fakeUserRepositoryImpl"));
 
         assertTrue(wasInvoked.get());
+    }
+
+    @Test
+    void createBobo_whenBoboDefinitionNull_throwNullPointerException() {
+        // Given
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenReturn(new FakeUserRepositoryImpl());
+
+        BoboFactory factory = new BoboFactory(mockRegistry);
+        // When
+        NullPointerException actualException = assertThrows(NullPointerException.class, () -> factory.createBobo(null));
+        // Then
+        assertEquals("BoboDefinition must not be null", actualException.getMessage());
+    }
+
+    @Test
+    void createBobo_whenGetBoboException_shouldReThrowIt() {
+        // Given
+        BoboException expectedException = new BoboException("Some bobo error");
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenThrow(expectedException);
+        BoboFactory factory = new BoboFactory(mockRegistry);
+        // When
+        BoboException actualException = assertThrows(BoboException.class, () -> factory.createBobo(BoboDefinition.of(
+                FakeUserServiceImpl.class,
+                "myServiceImpl"
+        )));
+        // Then
+        assertEquals(expectedException, actualException);
+    }
+
+    @Test
+    void createBobo_whenGetNotBoboException_shouldWrapItToBoboException() {
+        // Given
+        NullPointerException expectedException = new NullPointerException("Intentionally");
+
+        when(mockRegistry.getBobo(FakeUserRepository.class)).thenThrow(expectedException);
+
+        BoboFactory factory = new BoboFactory(mockRegistry);
+        // When
+        BoboException actualException = assertThrows(BoboException.class, () -> factory.createBobo(BoboDefinition.of(
+                FakeUserServiceImpl.class,
+                "myServiceImpl"
+        )));
+        // Then
+        assertNotNull(actualException.getCause());
+        assertEquals(expectedException, actualException.getCause());
+        assertEquals("Error during configuring bobo object", actualException.getMessage());
     }
 
 }

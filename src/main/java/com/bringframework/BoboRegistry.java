@@ -7,6 +7,7 @@ import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
 import com.bringframework.exception.NoSuchBoboDefinitionException;
 import com.bringframework.util.BoboDefinitionUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import static com.bringframework.exception.ExceptionErrorMessage.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 public class BoboRegistry {
 
     private final static Object EMPTY = new Object();
@@ -41,13 +43,16 @@ public class BoboRegistry {
 
     public <T> T getBobo(Class<T> type) {
         List<BoboDefinition> candidates = findCandidates(type);
-        if (candidates.size() == 0) {
+        int sizeOfCandidates = candidates.size();
+        if (sizeOfCandidates == 0) {
+            log.debug("There is no candidates for such BoboDefinition");
             throw new NoSuchBoboDefinitionException(
                     String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_TYPE, type.getSimpleName()));
         }
-        if (candidates.size() > 1) {
+        if (sizeOfCandidates > 1) {
+            log.error("Expected single matching bobo, but was {}", sizeOfCandidates);
             throw new AmbiguousBoboDefinitionException(String.format(
-                    AMBIGUOUS_BOBO_EXCEPTION, type.getCanonicalName(), candidates.size(),
+                    AMBIGUOUS_BOBO_EXCEPTION, type.getCanonicalName(), sizeOfCandidates,
                     candidates.stream()
                             .map(BoboDefinition::getBoboName)
                             .collect(joining(", ")))
@@ -75,10 +80,6 @@ public class BoboRegistry {
         for (Class<?> itemClass : itemsClasses) {
             registerBoboDefinition(BoboDefinitionUtil.buildDefinition(itemClass));
         }
-    }
-
-    public void register(Class<?> itemClass, Object instance, String name) {
-        registry.put(BoboDefinitionUtil.buildDefinition(itemClass, name), instance);
     }
 
     public void scan(String... basePackages) {
