@@ -2,6 +2,7 @@ package com.bringframework;
 
 import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.definition.BoboDefinition;
+import com.bringframework.definition.ConfigurationAnnotationBoboDefinitionScanner;
 import com.bringframework.definition.ItemAnnotationBoboDefinitionScanner;
 import com.bringframework.exception.AmbiguousBoboDefinitionException;
 import com.bringframework.exception.NoSuchBoboDefinitionException;
@@ -29,6 +30,8 @@ public class BoboRegistry {
         factory = new BoboFactory(this, basePackages);
         ItemAnnotationBoboDefinitionScanner.scan(basePackages)
                 .forEach(definition -> registry.put(definition, factory.createBobo(definition)));
+        ConfigurationAnnotationBoboDefinitionScanner.scan(basePackages)
+                .forEach(boboDefinition -> registry.put(boboDefinition, factory.createBobo(boboDefinition)));
     }
 
     public BoboRegistry(Class<?>... itemClasses) {
@@ -40,11 +43,11 @@ public class BoboRegistry {
         List<BoboDefinition> candidates = findCandidates(type);
         if (candidates.size() == 0) {
             throw new NoSuchBoboDefinitionException(
-                    String.format(NO_SUCH_BOBO_DEFINIITON_ERROR, type.getSimpleName()));
+                    String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_TYPE, type.getSimpleName()));
         }
         if (candidates.size() > 1) {
             throw new AmbiguousBoboDefinitionException(String.format(
-                    AMBIGUOUS_BOBO_ERROR, type.getCanonicalName(), candidates.size(),
+                    AMBIGUOUS_BOBO_EXCEPTION, type.getCanonicalName(), candidates.size(),
                     candidates.stream()
                             .map(BoboDefinition::getBoboName)
                             .collect(joining(", ")))
@@ -63,7 +66,7 @@ public class BoboRegistry {
         BoboDefinition definitionByName = registry.keySet().stream()
                 .filter(definition -> definition.getBoboName().equals(boboName))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION, boboName)));
+                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_NAME, boboName)));
 
         return getOrCreateBobo(definitionByName);
     }

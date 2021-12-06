@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_ERROR;
+import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_EXCEPTION;
 
 public class BoboFactory {
     private static final String DEFAULT_PACKAGE = "com.bringframework.configurator";
@@ -36,21 +36,33 @@ public class BoboFactory {
 
     public Object createBobo(BoboDefinition definition) {
         try {
-            Object newBobo = instantiate(definition);
+            Object newBobo;
+            if (definition.getConfigurationBoboName() != null) {
+                newBobo = createBoboByConfigMethod(definition);
+            } else {
+                newBobo = instantiate(definition);
 
-            configure(newBobo);
+                configure(newBobo);
+            }
 
             invokeInit(definition, newBobo);
 
             return newBobo;
         } catch (Exception e) {
-            throw new BoboException(String.format(BOBO_INSTANTIATION_ERROR, definition.getBoboName()), e);
+            throw new BoboException(String.format(BOBO_INSTANTIATION_EXCEPTION, definition.getBoboName()), e);
         }
     }
 
     public void addBoboConfigurator(BoboConfigurator boboConfigurator) {
         Objects.requireNonNull(boboConfigurator, "BoboConfigurator must not be null");
         boboConfigurators.add(boboConfigurator);
+    }
+
+    private Object createBoboByConfigMethod(BoboDefinition definition) throws Exception {
+        String configClassName = definition.getConfigurationBoboName();
+        Class<?> configClassType = Class.forName(configClassName);
+        Object config = configClassType.getDeclaredConstructor().newInstance();
+        return configClassType.getMethod(definition.getConfigurationMethodName()).invoke(config);
     }
 
     private <T> T instantiate(BoboDefinition definition) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {

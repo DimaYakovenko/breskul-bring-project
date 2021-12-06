@@ -19,6 +19,15 @@ public class BoboDefinitionUtil {
                 .build();
     }
 
+    public BoboDefinition buildDefinition(Class<?> type, String name, String configMethodName, String configClassName) {
+        return BoboDefinition.builder()
+                .boboName(name)
+                .boboClass(type)
+                .configurationBoboName(configClassName)
+                .configurationMethodName(configMethodName)
+                .build();
+    }
+
     public static String generateBoboName(Class<?> type) {
         return decapitalize(type.getSimpleName());
     }
