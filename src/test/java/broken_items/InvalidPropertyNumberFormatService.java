@@ -1,4 +1,4 @@
-package items.broken.service;
+package broken_items;
 
 import com.bringframework.annotation.BoboValue;
 import com.bringframework.annotation.Item;

@@ -2,9 +2,9 @@ package com.bringframework.configurator;
 
 import com.bringframework.BoboRegistry;
 import com.bringframework.exception.BoboException;
-import items.broken.service.InvalidPropertyClassCastService;
+import broken_items.InvalidPropertyClassCastService;
 import items.service.impl.FakeUserServiceImpl;
-import items.broken.service.InvalidPropertyNumberFormatService;
+import broken_items.InvalidPropertyNumberFormatService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 
@@ -21,7 +21,7 @@ class BoboValueAnnotationConfigurationTest {
     private final String INCORRECT_PATH_TO_PROPERTIES_FILE = "bring/breskul-bring-project/target/test-classes";
     private final String NOT_FOUND_FILE_MSG = "Can't find properties file in resources with name application.properties";
     private final String CLASS_CAST_EXCEPTION_MSG = "Can't cast value \"not_valid_value\" to FakeUser class";
-    private final String BOBO_EXCEPTION_MSG = "Can't set value \"not_valid_value\" from properties to field \"fakeUser\" in class items.broken.service.InvalidPropertyClassCastService";
+    private final String BOBO_EXCEPTION_MSG = "Can't set value \"not_valid_value\" from properties to field \"fakeUser\" in class broken_items.InvalidPropertyClassCastService";
 
     @Test
     @SneakyThrows
