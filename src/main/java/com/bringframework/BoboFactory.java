@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.bringframework.configurator.BoboConfiguratorScanner.DEFAULT_PACKAGE;
+import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_EXCEPTION;
 import static java.util.Objects.requireNonNull;
 
 @Slf4j
@@ -57,7 +58,7 @@ public class BoboFactory {
             throw boboException;
         } catch (Exception e) {
             log.error("Can`t create new bobo {} from definition {}", boboName, definition);
-            throw new BoboException(String.format(BOBO_INSTANTIATION_ERROR, definition.getBoboName()), e);
+            throw new BoboException(String.format(BOBO_INSTANTIATION_EXCEPTION, definition.getBoboName()), e);
         }
     }
 
