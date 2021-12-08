@@ -22,3 +22,5 @@
 **/.idea
 *.iml
 *.lst
+target/
+.DS_Store

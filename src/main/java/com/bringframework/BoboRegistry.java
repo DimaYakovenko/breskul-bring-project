@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import static com.bringframework.exception.ExceptionErrorMessage.*;
 import static java.util.stream.Collectors.joining;
@@ -30,19 +31,23 @@ public class BoboRegistry {
 
     public BoboRegistry(String... basePackages) {
         factory = new BoboFactory(this, basePackages);
-        ItemAnnotationBoboDefinitionScanner.scan(basePackages)
-                .forEach(definition -> registry.put(definition, factory.createBobo(definition)));
+        Consumer<BoboDefinition> fillRegistry = definition -> registry.put(definition, EMPTY);
 
-        List<BoboDefinition> configs = ConfigurationAnnotationBoboDefinitionScanner.scan(basePackages);
-        configs.forEach(boboDefinition -> registry.put(boboDefinition, factory.createBobo(boboDefinition)));
+        ItemAnnotationBoboDefinitionScanner.scan(basePackages).forEach(fillRegistry);
+        ConfigurationAnnotationBoboDefinitionScanner.scan(basePackages).forEach(fillRegistry);
 
-        ConfigurationAnnotationBoboDefinitionScanner.createDefinitionsByConfiguration(configs)
-                .forEach(boboDefinition -> registry.put(boboDefinition, factory.createBobo(boboDefinition)));
+        refresh();
+    }
+
+    public void refresh() {
+        registry.replaceAll((definition, old) -> EMPTY);
+        registry.replaceAll((definition, ignored) -> factory.createBobo(definition));
     }
 
     public BoboRegistry(Class<?>... itemClasses) {
         this();
         register(itemClasses);
+        refresh();
     }
 
     public <T> T getBobo(Class<T> type) {
@@ -72,12 +77,7 @@ public class BoboRegistry {
     }
 
     public Object getBobo(String boboName) {
-        BoboDefinition definitionByName = registry.keySet().stream()
-                .filter(definition -> definition.getBoboName().equals(boboName))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINITION_BY_NAME_EXCEPTION, boboName)));
-
-        return getOrCreateBobo(definitionByName);
+        return getOrCreateBobo(getBoboDefinition(boboName));
     }
 
     public void register(Class<?>... itemsClasses) {
@@ -92,6 +92,28 @@ public class BoboRegistry {
 
     public void addBoboConfigurator(BoboConfigurator boboConfigurator) {
         factory.addBoboConfigurator(boboConfigurator);
+    }
+
+    public boolean contains(String boboName) {
+        return registry.entrySet()
+                .stream()
+                .anyMatch(entry -> entry.getKey().getBoboName().equals(boboName) && entry.getValue() != EMPTY);
+    }
+
+    public boolean containsDefinition(String boboName) {
+        return registry.entrySet().stream()
+                .anyMatch(entry -> entry.getKey().getBoboName().equals(boboName));
+    }
+
+    public void putBobo(BoboDefinition definition, Object bobo) {
+        registry.put(definition, bobo);
+    }
+
+    public BoboDefinition getBoboDefinition(String boboName) {
+        return registry.keySet().stream()
+                .filter(definition -> definition.getBoboName().equals(boboName))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINITION_BY_NAME_EXCEPTION, boboName)));
     }
 
     private void registerBoboDefinition(BoboDefinition definition) {

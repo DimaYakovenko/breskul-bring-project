@@ -2,6 +2,8 @@ package com.bringframework;
 
 import com.bringframework.configurator.BoboConfigurator;
 import com.bringframework.configurator.BoboConfiguratorScanner;
+import com.bringframework.configurator.BoboProxyConfiguratorScanner;
+import com.bringframework.configurator.proxyconfigurator.ProxyConfigurator;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.exception.BoboException;
 import lombok.extern.slf4j.Slf4j;
@@ -18,21 +20,25 @@ import static java.util.Objects.requireNonNull;
 @Slf4j
 public class BoboFactory {
     private final List<BoboConfigurator> boboConfigurators;
+    private final List<ProxyConfigurator> proxyConfigurators;
     private final BoboRegistry registry;
 
     public BoboFactory(BoboRegistry registry) {
         this.registry = registry;
         boboConfigurators = BoboConfiguratorScanner.scan(DEFAULT_PACKAGE);
+        proxyConfigurators = BoboProxyConfiguratorScanner.scan(DEFAULT_PACKAGE);
     }
 
     public BoboFactory(BoboRegistry registry, String... configuratorsPackages) {
         this.registry = registry;
         if (configuratorsPackages == null) {
             boboConfigurators = BoboConfiguratorScanner.scan(DEFAULT_PACKAGE);
+            proxyConfigurators = BoboProxyConfiguratorScanner.scan(DEFAULT_PACKAGE);
         } else {
             String[] packages = Arrays.copyOf(configuratorsPackages, configuratorsPackages.length + 1);
             packages[configuratorsPackages.length] = DEFAULT_PACKAGE;
             boboConfigurators = BoboConfiguratorScanner.scan(packages);
+            proxyConfigurators = BoboProxyConfiguratorScanner.scan(packages);
         }
     }
 
@@ -52,6 +58,8 @@ public class BoboFactory {
 
             invokeInit(definition, newBobo);
 
+            newBobo = wrapWithProxyIfNeeded(newBobo, definition.getBoboClass());
+
             return newBobo;
         } catch (BoboException boboException) {
             log.error("Can`t create new bobo {} from definition {}", boboName, definition);
@@ -68,10 +76,9 @@ public class BoboFactory {
     }
 
     private Object createBoboByConfigMethod(BoboDefinition definition) throws Exception {
-        String configClassName = definition.getConfigurationBoboName();
-        Class<?> configClassType = Class.forName(configClassName);
-        Object config = configClassType.getDeclaredConstructor().newInstance();
-        return configClassType.getMethod(definition.getConfigurationMethodName()).invoke(config);
+        Object config = registry.getBobo(definition.getConfigurationBoboName());
+        Class<?> configClass = config.getClass();
+        return configClass.getMethod(definition.getConfigurationMethodName()).invoke(config);
     }
 
     private <T> T instantiate(BoboDefinition definition) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -87,5 +94,12 @@ public class BoboFactory {
             Method initMethod = definition.getBoboClass().getMethod(definition.getInitMethodName());
             initMethod.invoke(bobo);
         }
+    }
+
+    private Object wrapWithProxyIfNeeded(Object newBobo, Class<?> boboClass) {
+        for (ProxyConfigurator proxyConfigurator : proxyConfigurators) {
+            newBobo = proxyConfigurator.replaceWithProxyIfNeeded(newBobo, boboClass, registry);
+        }
+        return newBobo;
     }
 }
