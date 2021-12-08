@@ -10,8 +10,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Collectors;
 
 public class ConfigurationAnnotationBoboDefinitionScanner {
 
@@ -19,9 +18,16 @@ public class ConfigurationAnnotationBoboDefinitionScanner {
         Set<Class<?>> configurations = new Reflections(basePackages, Scanners.TypesAnnotated)
                 .getTypesAnnotatedWith(Configuration.class);
 
+        return configurations.stream()
+                .map(BoboDefinitionUtil::buildDefinition)
+                .collect(Collectors.toList());
+    }
+
+    public static List<BoboDefinition> createDefinitionsByConfiguration(List<BoboDefinition> configurations) {
         List<BoboDefinition> resultDefinition = new ArrayList<>();
 
-        for (Class<?> configClass : configurations) {
+        for (BoboDefinition configDefinition : configurations) {
+            Class<?> configClass = configDefinition.getBoboClass();
             Method[] declaredMethods = configClass.getDeclaredMethods();
             for (Method method : declaredMethods) {
                 if (method.isAnnotationPresent(Bobo.class)) {
@@ -32,10 +38,6 @@ public class ConfigurationAnnotationBoboDefinitionScanner {
                 }
             }
         }
-        resultDefinition.addAll(configurations.stream()
-                .map(BoboDefinitionUtil::buildDefinition)
-                .collect(toList()));
-
         return resultDefinition;
     }
 

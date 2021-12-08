@@ -32,7 +32,11 @@ public class BoboRegistry {
         factory = new BoboFactory(this, basePackages);
         ItemAnnotationBoboDefinitionScanner.scan(basePackages)
                 .forEach(definition -> registry.put(definition, factory.createBobo(definition)));
-        ConfigurationAnnotationBoboDefinitionScanner.scan(basePackages)
+
+        List<BoboDefinition> configs = ConfigurationAnnotationBoboDefinitionScanner.scan(basePackages);
+        configs.forEach(boboDefinition -> registry.put(boboDefinition, factory.createBobo(boboDefinition)));
+
+        ConfigurationAnnotationBoboDefinitionScanner.createDefinitionsByConfiguration(configs)
                 .forEach(boboDefinition -> registry.put(boboDefinition, factory.createBobo(boboDefinition)));
     }
 
