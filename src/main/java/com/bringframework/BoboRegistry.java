@@ -51,7 +51,7 @@ public class BoboRegistry {
         if (sizeOfCandidates == 0) {
             log.debug("There is no candidates for such BoboDefinition");
             throw new NoSuchBoboDefinitionException(
-                    String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_TYPE, type.getSimpleName()));
+                    String.format(NO_SUCH_BOBO_DEFINITION_BY_TYPE_EXCEPTION, type.getSimpleName()));
         }
         if (sizeOfCandidates > 1) {
             log.error("Expected single matching bobo, but was {}", sizeOfCandidates);
@@ -75,7 +75,7 @@ public class BoboRegistry {
         BoboDefinition definitionByName = registry.keySet().stream()
                 .filter(definition -> definition.getBoboName().equals(boboName))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_NAME, boboName)));
+                .orElseThrow(() -> new NoSuchBoboDefinitionException(String.format(NO_SUCH_BOBO_DEFINITION_BY_NAME_EXCEPTION, boboName)));
 
         return getOrCreateBobo(definitionByName);
     }

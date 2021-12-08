@@ -61,7 +61,7 @@ class BoboRegistryTest {
         Exception exception = assertThrows(NoSuchBoboDefinitionException.class, () -> boboRegistry.getBobo(myBoboClass));
 
         // Then
-        assertEquals(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_TYPE, myBoboClass.getSimpleName()), exception.getMessage());
+        assertEquals(String.format(NO_SUCH_BOBO_DEFINITION_BY_TYPE_EXCEPTION, myBoboClass.getSimpleName()), exception.getMessage());
     }
 
     @Test
@@ -117,7 +117,7 @@ class BoboRegistryTest {
         // When
         BoboException actualException = assertThrows(NoSuchBoboDefinitionException.class, () -> boboRegistry.getBobo(notExistsBoboName));
         // Then
-        assertEquals(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_NAME, notExistsBoboName), actualException.getMessage());
+        assertEquals(String.format(NO_SUCH_BOBO_DEFINITION_BY_NAME_EXCEPTION, notExistsBoboName), actualException.getMessage());
     }
 
     @Test
@@ -153,7 +153,7 @@ class BoboRegistryTest {
         BoboRegistry boboRegistry = new BoboRegistry(PACKAGE_TO_SCAN);
         String boboName = BoboDefinitionUtil.generateBoboName(FakeThirdService.class);
         Exception exception = assertThrows(NoSuchBoboDefinitionException.class, () -> boboRegistry.getBobo(boboName));
-        assertEquals(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_NAME, boboName), exception.getMessage());
+        assertEquals(String.format(NO_SUCH_BOBO_DEFINITION_BY_NAME_EXCEPTION, boboName), exception.getMessage());
     }
 
     @Test
@@ -161,7 +161,7 @@ class BoboRegistryTest {
         BoboRegistry boboRegistry = new BoboRegistry(PACKAGE_TO_SCAN);
         Class<FakeThirdService> nonExistingBoboType = FakeThirdService.class;
         Exception exception = assertThrows(NoSuchBoboDefinitionException.class, () -> boboRegistry.getBobo(nonExistingBoboType));
-        assertEquals(String.format(NO_SUCH_BOBO_DEFINIITON_EXCEPTION_BY_TYPE, nonExistingBoboType.getSimpleName()), exception.getMessage());
+        assertEquals(String.format(NO_SUCH_BOBO_DEFINITION_BY_TYPE_EXCEPTION, nonExistingBoboType.getSimpleName()), exception.getMessage());
     }
 
     @Test
