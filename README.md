@@ -52,3 +52,9 @@ public class MyService {
     ...    
 }
 ```
+
+@Bobo gives another possibility to create an object (Spring @Bean analog). Mark with this annotation only public methods.
+To enable this feature class should be marked as @Configuration.
+It is possible to set up a name for new bobo by @Bean(name = "yourName"). By default, it creates a bobo with name 
+same as class with first letter in lower case. 
+

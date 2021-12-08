@@ -16,6 +16,7 @@
         <junit-jupiter.version>5.8.1</junit-jupiter.version>
         <lombok.version>1.18.22</lombok.version>
         <reflections.version>0.10.2</reflections.version>
+        <cglib.version>3.2.4</cglib.version>
         <slf4j-api.version>1.7.32</slf4j-api.version>
         <mockito-core.version>4.0.0</mockito-core.version>
         <mockito-inline.version>4.0.0</mockito-inline.version>
@@ -33,6 +34,11 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>${reflections.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>${cglib.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

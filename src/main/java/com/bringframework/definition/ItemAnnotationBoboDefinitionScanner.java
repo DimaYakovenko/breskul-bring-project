@@ -1,33 +1,22 @@
 package com.bringframework.definition;
 
 import com.bringframework.annotation.Item;
+import com.bringframework.util.BoboDefinitionUtil;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
 import java.util.List;
+import java.util.Set;
 
-import static java.beans.Introspector.decapitalize;
 import static java.util.stream.Collectors.toList;
 
 public class ItemAnnotationBoboDefinitionScanner {
 
     public static List<BoboDefinition> scan(String... basePackages) {
-        return new Reflections(basePackages, Scanners.TypesAnnotated)
-                .getTypesAnnotatedWith(Item.class)
-                .stream()
-                .map(ItemAnnotationBoboDefinitionScanner::buildDefinition)
+        Set<Class<?>> items = new Reflections(basePackages, Scanners.TypesAnnotated).getTypesAnnotatedWith(Item.class);
+
+        return items.stream()
+                .map(BoboDefinitionUtil::buildDefinition)
                 .collect(toList());
     }
-
-    public static BoboDefinition buildDefinition(Class<?> type) {
-        return BoboDefinition.builder()
-                .boboName(generateBoboName(type))
-                .boboClass(type)
-                .build();
-    }
-
-    private static String generateBoboName(Class<?> type) {
-        return decapitalize(type.getSimpleName());
-    }
-
 }

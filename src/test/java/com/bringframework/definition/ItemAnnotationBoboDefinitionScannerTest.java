@@ -1,5 +1,6 @@
 package com.bringframework.definition;
 
+import com.bringframework.util.BoboDefinitionUtil;
 import items.dao.impl.FakeUserRepositoryImpl;
 import items.service.impl.FakeUserServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class ItemAnnotationBoboDefinitionScannerTest {
     void buildDefinition_whenCallBuildDefinition_returnValidBoboDefinition() {
         assertEquals(
                 BoboDefinition.builder().boboName("fakeUserServiceImpl").boboClass(FakeUserServiceImpl.class).build(),
-                ItemAnnotationBoboDefinitionScanner.buildDefinition(FakeUserServiceImpl.class)
+                BoboDefinitionUtil.buildDefinition(FakeUserServiceImpl.class)
         );
     }
 }
