@@ -41,8 +41,14 @@ public class ConfigurationAnnotationBoboDefinitionScanner {
             for (Method method : declaredMethods) {
                 if (method.isAnnotationPresent(Bobo.class)) {
                     String boboName = findBoboName(method);
-                    BoboDefinition boboDefinition = BoboDefinitionUtil.buildDefinition(method.getReturnType(), boboName,
-                            method, configClass);
+                    String initMethodName = findBoboInitMethodName(method);
+                    BoboDefinition boboDefinition = BoboDefinitionUtil.buildDefinition(
+                            method.getReturnType(),
+                            boboName,
+                            method,
+                            configClass,
+                            initMethodName
+                    );
                     resultDefinition.add(boboDefinition);
                 }
             }
@@ -59,5 +65,12 @@ public class ConfigurationAnnotationBoboDefinitionScanner {
         return annotation.name().isEmpty()
                 ? method.getName()
                 : annotation.name();
+    }
+
+    private static String findBoboInitMethodName(Method method) {
+        Bobo annotation = method.getAnnotation(Bobo.class);
+        return annotation.initMethod().isEmpty()
+                ? null
+                : annotation.initMethod();
     }
 }

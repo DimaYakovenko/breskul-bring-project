@@ -118,7 +118,7 @@ public class BoboFactory {
 
     private <T> void invokeInit(BoboDefinition definition, T bobo) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         if (definition.getInitMethodName() != null) {
-            Method initMethod = definition.getBoboClass().getMethod(definition.getInitMethodName());
+            Method initMethod = definition.getBoboClass().getDeclaredMethod(definition.getInitMethodName());
             initMethod.invoke(bobo);
         }
     }
