@@ -27,7 +27,7 @@ public class ConfigurationAnnotationBoboDefinitionScanner {
                 if (method.isAnnotationPresent(Bobo.class)) {
                     String boboName = findBoboName(method);
                     BoboDefinition boboDefinition = BoboDefinitionUtil.buildDefinition(method.getReturnType(), boboName,
-                            method.getName(), configClass);
+                            method, configClass);
                     resultDefinition.add(boboDefinition);
                 }
             }

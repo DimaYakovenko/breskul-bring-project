@@ -1,6 +1,9 @@
 package com.bringframework.definition;
 
+import com.bringframework.util.BoboDefinitionUtil;
 import lombok.*;
+
+import java.lang.reflect.Constructor;
 
 @Data
 @Builder
@@ -13,8 +16,10 @@ public class BoboDefinition {
     private String initMethodName;
     private String configurationBoboName;
     private String configurationMethodName;
+    private Constructor<?> constructor;
+    private Class<?>[] parameterTypes;
 
     public static BoboDefinition of(Class<?> boboClass, String boboName) {
-        return BoboDefinition.builder().boboClass(boboClass).boboName(boboName).build();
+        return BoboDefinitionUtil.buildDefinition(boboClass, boboName);
     }
 }

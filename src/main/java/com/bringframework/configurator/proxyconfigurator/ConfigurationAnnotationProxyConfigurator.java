@@ -16,7 +16,7 @@ public class ConfigurationAnnotationProxyConfigurator implements ProxyConfigurat
             Enhancer enhancer = new Enhancer();
             enhancer.setSuperclass(implClass);
             enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
-                if (method.getName().equals("toString") || method.getName().equals("hashCode")) {
+                if (!method.isAnnotationPresent(Bobo.class)) {
                     return proxy.invokeSuper(obj, args);
                 }
                 log.debug("Calling proxied configuration '{}' method", method.getName());

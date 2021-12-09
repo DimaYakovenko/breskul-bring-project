@@ -8,6 +8,7 @@ import com.bringframework.definition.BoboDefinition;
 import com.bringframework.exception.BoboException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -78,11 +79,31 @@ public class BoboFactory {
     private Object createBoboByConfigMethod(BoboDefinition definition) throws Exception {
         Object config = registry.getBobo(definition.getConfigurationBoboName());
         Class<?> configClass = config.getClass();
-        return configClass.getMethod(definition.getConfigurationMethodName()).invoke(config);
+        if (definition.getParameterTypes() == null) {
+            Method method = configClass.getMethod(definition.getConfigurationMethodName());
+            return method.invoke(config);
+        }
+        Method method = configClass.getMethod(definition.getConfigurationMethodName(), definition.getParameterTypes());
+        Object[] resolvedArgs = resolveBoboParameters(method.getParameterTypes());
+        return method.invoke(config, resolvedArgs);
     }
 
-    private <T> T instantiate(BoboDefinition definition) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        return (T) definition.getBoboClass().getDeclaredConstructor().newInstance();
+    private <T> T instantiate(BoboDefinition definition) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+        Constructor<?> constructor = definition.getConstructor();
+        constructor.setAccessible(true);
+        if (definition.getParameterTypes() == null) {
+            return (T) constructor.newInstance();
+        }
+        Object[] resolvedArgs = resolveBoboParameters(definition.getParameterTypes());
+        return (T) constructor.newInstance(resolvedArgs);
+    }
+
+    private Object[] resolveBoboParameters(Class<?>[] types) {
+        Object[] resultArgs = new Object[types.length];
+        for (int i = 0; i < types.length; i++) {
+            resultArgs[i] = registry.getBobo(types[i]);
+        }
+        return resultArgs;
     }
 
     private <T> void configure(T bobo) {

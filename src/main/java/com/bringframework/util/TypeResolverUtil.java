@@ -1,6 +1,5 @@
 package com.bringframework.util;
 
-import com.bringframework.exception.BoboException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
