@@ -1,4 +1,4 @@
-package constructor_injection;
+package constructor_injection.successful_cases;
 
 import com.bringframework.annotation.Item;
 
