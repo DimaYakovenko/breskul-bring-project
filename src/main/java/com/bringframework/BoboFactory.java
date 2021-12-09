@@ -78,23 +78,21 @@ public class BoboFactory {
 
     private Object createBoboByConfigMethod(BoboDefinition definition) throws Exception {
         Object config = registry.getBobo(definition.getConfigurationBoboName());
-        Class<?> configClass = config.getClass();
-        if (definition.getParameterTypes() == null) {
-            Method method = configClass.getMethod(definition.getConfigurationMethodName());
-            return method.invoke(config);
+        Method configurationMethod = definition.getConfigurationMethod();
+        if (configurationMethod.getParameterCount() == 0) {
+            return configurationMethod.invoke(config);
         }
-        Method method = configClass.getMethod(definition.getConfigurationMethodName(), definition.getParameterTypes());
-        Object[] resolvedArgs = resolveBoboParameters(method.getParameterTypes());
-        return method.invoke(config, resolvedArgs);
+        Object[] resolvedArgs = resolveBoboParameters(configurationMethod.getParameterTypes());
+        return configurationMethod.invoke(config, resolvedArgs);
     }
 
     private <T> T instantiate(BoboDefinition definition) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         Constructor<?> constructor = definition.getConstructor();
         constructor.setAccessible(true);
-        if (definition.getParameterTypes() == null) {
+        if (constructor.getParameterCount() == 0) {
             return (T) constructor.newInstance();
         }
-        Object[] resolvedArgs = resolveBoboParameters(definition.getParameterTypes());
+        Object[] resolvedArgs = resolveBoboParameters(constructor.getParameterTypes());
         return (T) constructor.newInstance(resolvedArgs);
     }
 

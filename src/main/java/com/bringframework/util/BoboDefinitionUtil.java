@@ -24,7 +24,6 @@ public class BoboDefinitionUtil {
                 .boboName(name)
                 .boboClass(type)
                 .constructor(constructor)
-                .parameterTypes(constructor.getParameterTypes())
                 .build();
     }
 
@@ -33,8 +32,7 @@ public class BoboDefinitionUtil {
                 .boboName(name)
                 .boboClass(type)
                 .configurationBoboName(decapitalize(configClassName.getSimpleName()))
-                .configurationMethodName(configMethod.getName())
-                .parameterTypes(configMethod.getParameterTypes())
+                .configurationMethod(configMethod)
                 .build();
     }
 
