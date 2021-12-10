@@ -1,4 +1,4 @@
-package circular.negative;
+package circular.negative_cases;
 
 import com.bringframework.annotation.Inject;
 import com.bringframework.annotation.Item;

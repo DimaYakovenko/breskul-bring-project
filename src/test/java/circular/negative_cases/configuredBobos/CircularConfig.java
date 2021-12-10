@@ -1,4 +1,4 @@
-package circular.negative.configuredBobos;
+package circular.negative_cases.configuredBobos;
 
 import com.bringframework.annotation.Bobo;
 import com.bringframework.annotation.Configuration;

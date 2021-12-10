@@ -25,6 +25,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Andrii Bobrov
  * @author Mykhailo Pysarenko
+ * @author Dmytro Yakovenko
  * @author Yuliia Smerechynska
  * @since 3 november 2021
  */

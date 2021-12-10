@@ -20,6 +20,12 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * The root class for accessing a Bring object container.
+ *
+ * @author Andrii Bobrov
+ * @author Mykhailo Pysarenko
+ * @author Dmytro Yakovenko
+ * @author Yuliia Smerechynska
+ * @since 3 november 2021
  */
 @Slf4j
 public class BoboRegistry {
@@ -39,13 +45,6 @@ public class BoboRegistry {
         ConfigurationAnnotationBoboDefinitionScanner.scan(basePackages).forEach(fillRegistry);
 
         refresh();
-    }
-
-    public void refresh() {
-        registry.replaceAll((definition, old) -> NullBobo.NULL);
-        for (Map.Entry<BoboDefinition, Object> entry : registry.entrySet()) {
-            entry.setValue(factory.createBobo(entry.getKey()));
-        }
     }
 
     public BoboRegistry(Class<?>... itemClasses) {
@@ -92,6 +91,13 @@ public class BoboRegistry {
 
     public void scan(String... basePackages) {
         ItemAnnotationBoboDefinitionScanner.scan(basePackages).forEach(definition -> registry.put(definition, NullBobo.NULL));
+    }
+
+    public void refresh() {
+        registry.replaceAll((definition, old) -> NullBobo.NULL);
+        for (Map.Entry<BoboDefinition, Object> entry : registry.entrySet()) {
+            entry.setValue(factory.createBobo(entry.getKey()));
+        }
     }
 
     public void addBoboConfigurator(BoboConfigurator boboConfigurator) {
@@ -154,6 +160,9 @@ public class BoboRegistry {
         return newBobo;
     }
 
+    /**
+     * Enum for filling context with default values
+     */
     private enum NullBobo {
         NULL;
 
