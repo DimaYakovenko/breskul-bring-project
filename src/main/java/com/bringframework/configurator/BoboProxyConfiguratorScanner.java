@@ -2,6 +2,7 @@ package com.bringframework.configurator;
 
 import com.bringframework.configurator.proxyconfigurator.ProxyConfigurator;
 import com.bringframework.exception.BoboException;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -9,9 +10,22 @@ import org.reflections.scanners.Scanners;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for scanning packages for the implementation of {@link ProxyConfigurator}
+ *
+ * @author Andrii Bobrov
+ * @since 8 december 2021
+ */
 @Slf4j
+@UtilityClass
 public class BoboProxyConfiguratorScanner {
 
+    /**
+     * Scan input packages for the {@link ProxyConfigurator} implementations
+     *
+     * @param packageToScan array of packages where to find ProxyConfigurators
+     * @return list of found {@link ProxyConfigurator} implementations
+     */
     public static List<ProxyConfigurator> scan(String... packageToScan) {
         log.info("Scan processing started for packages {}", (Object[]) packageToScan);
         return new Reflections(packageToScan, Scanners.SubTypes)
@@ -33,3 +47,4 @@ public class BoboProxyConfiguratorScanner {
     }
 
 }
+

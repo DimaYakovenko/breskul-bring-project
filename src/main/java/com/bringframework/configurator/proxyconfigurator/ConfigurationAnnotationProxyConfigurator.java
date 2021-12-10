@@ -8,8 +8,24 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
+/**
+ * <p> ProxyConfigurator class for replacing classes annotated with {@link Configuration} by proxy
+ * <p>Implementation of {@link ProxyConfigurator} interface.
+ *
+ * @author Andrii Bobrov
+ * @since 8 december 2021
+ **/
 @Slf4j
 public class ConfigurationAnnotationProxyConfigurator implements ProxyConfigurator {
+    /**
+     * If `configurationCandidate` is annotated with {@link Configuration} it will be replaced
+     * by CGLIB Enhancer, so we can resolve Injecting Inter-bean Dependencies
+     *
+     * @param configurationCandidate bobo instance
+     * @param implClass              original bobo type
+     * @param registry               {@link BoboRegistry}
+     * @return proxy instance
+     */
     @Override
     public Object replaceWithProxyIfNeeded(Object configurationCandidate, Class<?> implClass, BoboRegistry registry) {
         if (implClass.isAnnotationPresent(Configuration.class)) {

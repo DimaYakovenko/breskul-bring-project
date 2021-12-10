@@ -11,13 +11,32 @@ import java.lang.reflect.Method;
 import static com.bringframework.exception.ExceptionErrorMessage.INVALID_INJECT_MARKED_CONSTRUCTOR_EXCEPTION;
 import static java.beans.Introspector.decapitalize;
 
+/**
+ * Class for parsing {@link BoboDefinition} from the Class type
+ *
+ * @author Mykhailo Pysarenko
+ * @since 8 december 2021
+ */
 @UtilityClass
 public class BoboDefinitionUtil {
 
+    /**
+     * Build {@link BoboDefinition}
+     *
+     * @param type
+     * @return {@link BoboDefinition}
+     */
     public BoboDefinition buildDefinition(Class<?> type) {
         return buildDefinition(type, generateBoboName(type));
     }
 
+    /**
+     * Build {@link BoboDefinition}
+     *
+     * @param type Class to be parsed
+     * @param name String boboName
+     * @return {@link BoboDefinition}
+     */
     public BoboDefinition buildDefinition(Class<?> type, String name) {
         Constructor<?> constructor = defineConstructor(type, name);
         return BoboDefinition.builder()
@@ -27,15 +46,30 @@ public class BoboDefinitionUtil {
                 .build();
     }
 
-    public BoboDefinition buildDefinition(Class<?> type, String name, Method configMethod, Class<?> configClassName) {
+    /**
+     * Build {@link BoboDefinition} for {@link com.bringframework.annotation.Bobo}
+     *
+     * @param type         Class to be parsed
+     * @param name         String boboName
+     * @param configMethod Configuration method
+     * @param configClass  Configuration class
+     * @return {@link BoboDefinition}
+     */
+    public BoboDefinition buildDefinition(Class<?> type, String name, Method configMethod, Class<?> configClass) {
         return BoboDefinition.builder()
                 .boboName(name)
                 .boboClass(type)
-                .configurationBoboName(decapitalize(configClassName.getSimpleName()))
+                .configurationBoboName(decapitalize(configClass.getSimpleName()))
                 .configurationMethod(configMethod)
                 .build();
     }
 
+    /**
+     * Generate Bobo name from class
+     *
+     * @param type
+     * @return bobo name
+     */
     public static String generateBoboName(Class<?> type) {
         return decapitalize(type.getSimpleName());
     }

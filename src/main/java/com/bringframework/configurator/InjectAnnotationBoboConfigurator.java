@@ -7,8 +7,22 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 
+/**
+ * <p> BoboConfigurator class for injecting Bobo into fields annotated with {@link Inject}
+ * <p>Implementation of {@link BoboConfigurator} interface.
+ *
+ * @author Andrii Bobrov
+ * @author Yuliia Smerechynska
+ * @since 12 november 2021
+ **/
 @Slf4j
 public class InjectAnnotationBoboConfigurator implements BoboConfigurator {
+    /**
+     * If input class has fields annotated with {@link Inject} they will be injected by type.
+     *
+     * @param bobo     bobo instance for configuring
+     * @param registry {@link BoboRegistry}
+     */
     @Override
     public void configure(Object bobo, BoboRegistry registry) {
         try {

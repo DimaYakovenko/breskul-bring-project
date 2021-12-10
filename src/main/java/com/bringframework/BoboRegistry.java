@@ -18,10 +18,11 @@ import static com.bringframework.exception.ExceptionErrorMessage.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * The root class for accessing a Bring object container.
+ */
 @Slf4j
 public class BoboRegistry {
-
-    private final static Object EMPTY = new Object();
 
     private final Map<BoboDefinition, Object> registry = new ConcurrentHashMap<>();
     private final BoboFactory factory;
@@ -32,7 +33,7 @@ public class BoboRegistry {
 
     public BoboRegistry(String... basePackages) {
         factory = new BoboFactory(this, basePackages);
-        Consumer<BoboDefinition> fillRegistry = definition -> registry.put(definition, EMPTY);
+        Consumer<BoboDefinition> fillRegistry = definition -> registry.put(definition, NullBobo.NULL);
 
         ItemAnnotationBoboDefinitionScanner.scan(basePackages).forEach(fillRegistry);
         ConfigurationAnnotationBoboDefinitionScanner.scan(basePackages).forEach(fillRegistry);
@@ -41,7 +42,7 @@ public class BoboRegistry {
     }
 
     public void refresh() {
-        registry.replaceAll((definition, old) -> EMPTY);
+        registry.replaceAll((definition, old) -> NullBobo.NULL);
         registry.replaceAll((definition, ignored) -> factory.createBobo(definition));
     }
 
@@ -88,7 +89,7 @@ public class BoboRegistry {
     }
 
     public void scan(String... basePackages) {
-        ItemAnnotationBoboDefinitionScanner.scan(basePackages).forEach(definition -> registry.put(definition, EMPTY));
+        ItemAnnotationBoboDefinitionScanner.scan(basePackages).forEach(definition -> registry.put(definition, NullBobo.NULL));
     }
 
     public void addBoboConfigurator(BoboConfigurator boboConfigurator) {
@@ -98,7 +99,7 @@ public class BoboRegistry {
     public boolean contains(String boboName) {
         return registry.entrySet()
                 .stream()
-                .anyMatch(entry -> entry.getKey().getBoboName().equals(boboName) && entry.getValue() != EMPTY);
+                .anyMatch(entry -> entry.getKey().getBoboName().equals(boboName) && entry.getValue() != NullBobo.NULL);
     }
 
     public boolean containsDefinition(String boboName) {
@@ -118,7 +119,7 @@ public class BoboRegistry {
     }
 
     private void registerBoboDefinition(BoboDefinition definition) {
-        registry.put(definition, EMPTY);
+        registry.put(definition, NullBobo.NULL);
     }
 
     private List<BoboDefinition> findCandidates(Class<?> type) {
@@ -141,7 +142,7 @@ public class BoboRegistry {
 
     private Object getOrCreateBobo(BoboDefinition definition) {
         Object singletonBobo = registry.get(definition);
-        if (singletonBobo != EMPTY) {
+        if (singletonBobo != NullBobo.NULL) {
             return singletonBobo;
         }
 
@@ -149,6 +150,15 @@ public class BoboRegistry {
         registry.put(definition, newBobo);
 
         return newBobo;
+    }
+
+    private enum NullBobo {
+        NULL;
+
+        @Override
+        public String toString() {
+            return "null";
+        }
     }
 
 }

@@ -18,6 +18,14 @@ import static com.bringframework.configurator.BoboConfiguratorScanner.DEFAULT_PA
 import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_EXCEPTION;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Class responsible for the creating and setting up new Bobo instances
+ *
+ * @author Andrii Bobrov
+ * @author Mykhailo Pysarenko
+ * @author Yuliia Smerechynska
+ * @since 3 november 2021
+ */
 @Slf4j
 public class BoboFactory {
     private final List<BoboConfigurator> boboConfigurators;
