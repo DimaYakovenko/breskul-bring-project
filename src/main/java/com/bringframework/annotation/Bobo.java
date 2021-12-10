@@ -21,4 +21,13 @@ public @interface Bobo {
      * @return the suggested bobo name, if any (or method name otherwise)
      */
     String name() default "";
+
+    /**
+     * The optional name of a method to call on the bean instance during initialization.
+     * Not commonly used, given that the method may be called programmatically directly
+     * within the body of a Bean-annotated method.
+     * <p>The default value is {@code ""}, indicating no init method to be called.
+     */
+    String initMethod() default "";
+
 }

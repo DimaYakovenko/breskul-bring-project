@@ -1,12 +1,14 @@
 package com.bringframework.util;
 
 import com.bringframework.annotation.Inject;
+import com.bringframework.annotation.InitMethod;
 import com.bringframework.definition.BoboDefinition;
 import com.bringframework.exception.BoboException;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import static com.bringframework.exception.ExceptionErrorMessage.INVALID_INJECT_MARKED_CONSTRUCTOR_EXCEPTION;
 import static java.beans.Introspector.decapitalize;
@@ -42,6 +44,7 @@ public class BoboDefinitionUtil {
         return BoboDefinition.builder()
                 .boboName(name)
                 .boboClass(type)
+                .initMethodName(getInitMethodName(type))
                 .constructor(constructor)
                 .build();
     }
@@ -55,12 +58,13 @@ public class BoboDefinitionUtil {
      * @param configClass  Configuration class
      * @return {@link BoboDefinition}
      */
-    public BoboDefinition buildDefinition(Class<?> type, String name, Method configMethod, Class<?> configClass) {
+    public BoboDefinition buildDefinition(Class<?> type, String name, Method configMethod, Class<?> configClass, String initMethodName) {
         return BoboDefinition.builder()
                 .boboName(name)
                 .boboClass(type)
                 .configurationBoboName(decapitalize(configClass.getSimpleName()))
                 .configurationMethod(configMethod)
+                .initMethodName(initMethodName)
                 .build();
     }
 
@@ -72,6 +76,14 @@ public class BoboDefinitionUtil {
      */
     public static String generateBoboName(Class<?> type) {
         return decapitalize(type.getSimpleName());
+    }
+
+    private static String getInitMethodName(Class<?> type) {
+        return Arrays.stream(type.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(InitMethod.class))
+                .map(Method::getName)
+                .findFirst()
+                .orElse(null);
     }
 
     private Constructor<?> defineConstructor(Class<?> type, String name) {
