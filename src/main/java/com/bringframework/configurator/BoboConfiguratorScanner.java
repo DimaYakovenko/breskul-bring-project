@@ -28,7 +28,7 @@ public class BoboConfiguratorScanner {
      * @return list of found {@link BoboConfigurator} implementations
      */
     public static List<BoboConfigurator> scan(String... packageToScan) {
-        log.info("Scan processing started for packages {}", (Object[]) packageToScan);
+        log.debug("Scan processing started for packages {}", (Object[]) packageToScan);
         return new Reflections(packageToScan, Scanners.SubTypes)
                 .getSubTypesOf(BoboConfigurator.class)
                 .stream()

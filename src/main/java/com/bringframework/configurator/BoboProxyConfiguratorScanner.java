@@ -27,7 +27,7 @@ public class BoboProxyConfiguratorScanner {
      * @return list of found {@link ProxyConfigurator} implementations
      */
     public static List<ProxyConfigurator> scan(String... packageToScan) {
-        log.info("Scan processing started for packages {}", (Object[]) packageToScan);
+        log.debug("Scan processing started for packages {}", (Object[]) packageToScan);
         return new Reflections(packageToScan, Scanners.SubTypes)
                 .getSubTypesOf(ProxyConfigurator.class)
                 .stream()
