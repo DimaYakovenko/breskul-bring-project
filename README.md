@@ -29,14 +29,14 @@ public class MyService {
 To have this class injected, we'll need to create an BoboRegistry and configure it
 properly:
 ```java
-BoboRegistry boboFactory = new BoboRegistry("package_to_scan");
+BoboRegistry boboRegistry = new BoboRegistry("package_to_scan");
 // or by passing classes that have @Item annotation: 
-BoboRegistry boboFactory = new BoboRegistry(MyServiceImpl.class, MyDao.class);
+BoboRegistry boboRegistry = new BoboRegistry(MyServiceImpl.class, MyDao.class);
 // or create empty BoboRegistry and then call scan method for scanning item classes:
-BoboRegistry boboFactory = new BoboRegistry();
-boboFactory.scan("package_1", "package_2");
+BoboRegistry boboRegistry = new BoboRegistry();
+boboRegistry.scan("package_1", "package_2");
 
-MyService bobo = boboFactory.getBobo(MyService.class);
+MyService bobo = boboRegistry.getBobo(MyService.class);
 ```
 `@BoboValue` annotation allows you to get values from a properties file. 
 This requires that a properties file (with name is `applcation.properties`)  be created in the user app in the resource directory. 
