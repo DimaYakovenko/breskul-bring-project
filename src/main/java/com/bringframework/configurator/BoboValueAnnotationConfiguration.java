@@ -19,6 +19,15 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * <p> BoboConfigurator class for injecting values into fields annotated with {@link BoboValue}
+ * <p> Implementation of {@link BoboConfigurator} interface.
+ * <p> To define these properties you should have `application.properties` file
+ * in the `resources` folder
+ *
+ * @author Misha Beheka
+ * @since 29 november 2021
+ **/
 public class BoboValueAnnotationConfiguration implements BoboConfigurator {
 
     private final Map<String, String> propertiesMap;
@@ -35,6 +44,13 @@ public class BoboValueAnnotationConfiguration implements BoboConfigurator {
                 .collect(toMap(key -> key[0].trim(), value -> value[1].trim()));
     }
 
+    /**
+     * If input class has fields annotated with {@link BoboValue} they will be injected as values.
+     * Currently, supported values to inject: String, Integer, Long, Double, Float, Byte, Short, BigInteger, BigDecimal.
+     *
+     * @param bobo     bobo instance for configuring
+     * @param registry {@link BoboRegistry}
+     */
     @Override
     public void configure(Object bobo, BoboRegistry registry) {
         for (Field field : bobo.getClass().getDeclaredFields()) {

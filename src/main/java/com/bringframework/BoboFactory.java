@@ -8,6 +8,7 @@ import com.bringframework.definition.BoboDefinition;
 import com.bringframework.exception.BoboException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -17,6 +18,14 @@ import static com.bringframework.configurator.BoboConfiguratorScanner.DEFAULT_PA
 import static com.bringframework.exception.ExceptionErrorMessage.BOBO_INSTANTIATION_EXCEPTION;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Class responsible for the creating and setting up new Bobo instances
+ *
+ * @author Andrii Bobrov
+ * @author Mykhailo Pysarenko
+ * @author Yuliia Smerechynska
+ * @since 3 november 2021
+ */
 @Slf4j
 public class BoboFactory {
     private final List<BoboConfigurator> boboConfigurators;
@@ -77,12 +86,30 @@ public class BoboFactory {
 
     private Object createBoboByConfigMethod(BoboDefinition definition) throws Exception {
         Object config = registry.getBobo(definition.getConfigurationBoboName());
-        Class<?> configClass = config.getClass();
-        return configClass.getMethod(definition.getConfigurationMethodName()).invoke(config);
+        Method configurationMethod = definition.getConfigurationMethod();
+        if (configurationMethod.getParameterCount() == 0) {
+            return configurationMethod.invoke(config);
+        }
+        Object[] resolvedArgs = resolveBoboParameters(configurationMethod.getParameterTypes());
+        return configurationMethod.invoke(config, resolvedArgs);
     }
 
-    private <T> T instantiate(BoboDefinition definition) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        return (T) definition.getBoboClass().getDeclaredConstructor().newInstance();
+    private <T> T instantiate(BoboDefinition definition) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+        Constructor<?> constructor = definition.getConstructor();
+        constructor.setAccessible(true);
+        if (constructor.getParameterCount() == 0) {
+            return (T) constructor.newInstance();
+        }
+        Object[] resolvedArgs = resolveBoboParameters(constructor.getParameterTypes());
+        return (T) constructor.newInstance(resolvedArgs);
+    }
+
+    private Object[] resolveBoboParameters(Class<?>[] types) {
+        Object[] resultArgs = new Object[types.length];
+        for (int i = 0; i < types.length; i++) {
+            resultArgs[i] = registry.getBobo(types[i]);
+        }
+        return resultArgs;
     }
 
     private <T> void configure(T bobo) {

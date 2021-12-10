@@ -7,11 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a field as to be injected instance by registry.
- *
+ * <p>
  * Provides injection only by type.
  */
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.CONSTRUCTOR})
 public @interface Inject {
 }

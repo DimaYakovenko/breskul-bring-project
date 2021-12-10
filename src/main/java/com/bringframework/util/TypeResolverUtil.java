@@ -1,13 +1,17 @@
 package com.bringframework.util;
 
-import com.bringframework.exception.BoboException;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+/**
+ * Utility class that provides methods to parsing property to specific type
+ *
+ * @author Misha Beheka
+ * @since 29 november 2021
+ */
+@UtilityClass
 public final class TypeResolverUtil {
 
     public static Object parseToType(String propertyValue, Class<?> clazz) throws NumberFormatException {
