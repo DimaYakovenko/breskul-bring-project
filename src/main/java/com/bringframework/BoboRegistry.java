@@ -43,8 +43,6 @@ public class BoboRegistry {
 
     public void refresh() {
         registry.replaceAll((definition, old) -> NullBobo.NULL);
-        registry.replaceAll((definition, ignored) -> factory.createBobo(definition));
-        registry.replaceAll((definition, old) -> NullBobo.NULL);
         for (Map.Entry<BoboDefinition, Object> entry : registry.entrySet()) {
             entry.setValue(factory.createBobo(entry.getKey()));
         }
