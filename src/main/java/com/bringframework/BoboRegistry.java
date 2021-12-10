@@ -21,12 +21,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class BoboRegistry {
 
-    private final static Object EMPTY = new Object() {
-        @Override
-        public String toString() {
-            return "EMPTY";
-        }
-    };
+    private final static Object EMPTY = new Object();
 
     private final Map<BoboDefinition, Object> registry = new ConcurrentHashMap<>();
     private final BoboFactory factory;
@@ -123,7 +118,7 @@ public class BoboRegistry {
     }
 
     private void registerBoboDefinition(BoboDefinition definition) {
-        registry.put(definition, factory.createBobo(definition));
+        registry.put(definition, EMPTY);
     }
 
     private List<BoboDefinition> findCandidates(Class<?> type) {

@@ -19,15 +19,15 @@ public class ConfigurationAnnotationProxyConfigurator implements ProxyConfigurat
                 if (!method.isAnnotationPresent(Bobo.class)) {
                     return proxy.invokeSuper(obj, args);
                 }
-                log.debug("Calling proxied configuration '{}' method", method.getName());
                 String boboName = method.getAnnotation(Bobo.class).name();
                 if (boboName.isEmpty()) {
                     boboName = method.getName();
                 }
                 if (registry.contains(boboName)) {
-                    log.debug("Return proxy bobo '{}' from registry", boboName);
+                    log.debug("Return cached bobo '{}' from registry", boboName);
                     return registry.getBobo(boboName);
                 }
+                log.debug("Calling the proxy configuration '{}' method", method.getName());
                 Object newBoboObj = proxy.invokeSuper(obj, args);
                 BoboDefinition boboDefinition = registry.getBoboDefinition(boboName);
                 registry.putBobo(boboDefinition, newBoboObj);
